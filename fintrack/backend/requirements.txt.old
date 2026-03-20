@@ -27,10 +27,8 @@ openpyxl==3.1.5
 
 # Configuration
 pydantic==2.10.2
-pydantic[email]==2.10.2            # EmailStr validation support
 pydantic-settings==2.6.1           # .env file loading
 python-dotenv==1.0.1
-email-validator==2.2.0             # required by pydantic[email]
 
 # HTTP client — for future Plaid integration
 httpx==0.28.0
