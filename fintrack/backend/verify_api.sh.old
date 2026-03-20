@@ -30,8 +30,8 @@ echo ""
 
 # 1. Image built?
 info "Checking Docker image..."
-if docker images --format '{{.Repository}}' | grep -qE "fintrack|backend-api"; then
-    IMAGE=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E "fintrack|backend-api" | head -1)
+if docker images --format '{{.Repository}}' | grep -q "fintrack"; then
+    IMAGE=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep fintrack | head -1)
     pass "Image found: ${IMAGE}"
 else
     fail "No fintrack image found. Run: docker compose build"
