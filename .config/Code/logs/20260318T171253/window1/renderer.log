@@ -1,0 +1,25 @@
+2026-03-18 17:13:02.771 [warning] Creation of workbench contribution 'workbench.contrib.chatSetup' took 32ms.
+2026-03-18 17:13:02.886 [warning] Creation of workbench contribution 'workbench.contrib.configurationDefaultOverridesContribution' took 28ms.
+2026-03-18 17:13:08.311 [info] Started local extension host with pid 14252.
+2026-03-18 17:13:11.769 [info] Started initializing default profile extensions in extensions installation folder. file:///home/fintrack/.vscode/extensions
+2026-03-18 17:13:20.030 [info] Completed initializing default profile extensions in extensions installation folder. file:///home/fintrack/.vscode/extensions
+2026-03-18 17:13:31.865 [info] MCP Registry configured: https://api.mcp.github.com
+2026-03-18 17:13:32.152 [info] Settings Sync: Account status changed from uninitialized to unavailable
+2026-03-18 17:13:37.175 [info] [perf] Render performance baseline is 472ms
+2026-03-18 17:16:27.797 [error] An unknown error occurred. Please consult the log for more details.
+2026-03-18 17:19:05.425 [info] [ChatSessionsService] registerContribution called for type='claude-code', canDelegate=true, when='config.github.copilot.chat.claudeAgent.enabled', extension='GitHub.copilot-chat'
+2026-03-18 17:19:05.427 [info] [ChatSessionsService] _enableContribution: type='claude-code', canDelegate=true
+2026-03-18 17:19:05.459 [info] [ChatSessionsService] registerContribution called for type='copilotcli', canDelegate=true, when='config.github.copilot.chat.backgroundAgent.enabled', extension='GitHub.copilot-chat'
+2026-03-18 17:19:05.464 [info] [ChatSessionsService] _enableContribution: type='copilotcli', canDelegate=true
+2026-03-18 17:19:05.481 [info] [ChatSessionsService] registerContribution called for type='copilot-cloud-agent', canDelegate=true, when='config.github.copilot.chat.cloudAgent.enabled', extension='GitHub.copilot-chat'
+2026-03-18 17:19:05.482 [info] [ChatSessionsService] _enableContribution: type='copilot-cloud-agent', canDelegate=true
+2026-03-18 17:19:13.963 [info] Extension host (LocalProcess pid: 14252) is unresponsive.
+2026-03-18 17:19:14.544 [info] Extension host (LocalProcess pid: 14252) is responsive.
+2026-03-18 17:19:17.896 [info] UNRESPONSIVE extension host: received responsive event and cancelling profiling session
+2026-03-18 17:19:24.364 [info] Extension host (LocalProcess pid: 14252) is unresponsive.
+2026-03-18 17:19:26.090 [info] UNRESPONSIVE extension host: starting to profile NOW
+2026-03-18 17:19:27.221 [warning] UNRESPONSIVE extension host: 'github.copilot-chat' took 89.69904861047763% of 1337.298ms, saved PROFILE here: 'file:///tmp/exthost-71d604.cpuprofile'
+2026-03-18 17:19:29.752 [error] [Extension Host] (node:14252) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `exe --trace-deprecation ...` to show where the warning was created)
+2026-03-18 17:19:29.762 [error] [Extension Host] (node:14252) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+2026-03-18 17:19:29.766 [info] Extension host (LocalProcess pid: 14252) is responsive.

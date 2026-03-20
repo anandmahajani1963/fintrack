@@ -1,1 +1,0 @@
-# fintrack app/schemas package

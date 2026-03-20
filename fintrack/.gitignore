@@ -46,7 +46,7 @@ test_output/
 *.xlsx
 *.csv
 
-# vbox cliet
+# vbox
 .vboxclient-clipboard-tty2-control.pid
 .vboxclient-clipboard-tty2-service.pid
 .vboxclient-draganddrop-tty2-control.pid

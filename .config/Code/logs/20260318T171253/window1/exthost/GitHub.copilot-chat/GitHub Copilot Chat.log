@@ -1,0 +1,43 @@
+2026-03-18 17:19:32.680 [info] [GitExtensionServiceImpl] Initializing Git extension service.
+2026-03-18 17:19:32.680 [info] [GitExtensionServiceImpl] Successfully activated the vscode.git extension.
+2026-03-18 17:19:32.680 [info] [GitExtensionServiceImpl] Enablement state of the vscode.git extension: true.
+2026-03-18 17:19:32.680 [info] [GitExtensionServiceImpl] Successfully registered Git commit message provider.
+2026-03-18 17:19:32.680 [info] ConversationFeature: Waiting for copilot token to activate conversation feature
+2026-03-18 17:19:32.680 [info] Using the Electron fetcher.
+2026-03-18 17:19:32.680 [info] Creating node-pty shim: source=/usr/share/code/resources/app/node_modules/node-pty/build/Release, dest=/home/fintrack/.vscode/extensions/github.copilot-chat-0.40.1/node_modules/@github/copilot/sdk/prebuilds/linux-x64
+2026-03-18 17:19:32.680 [info] Creating ripgrep shim: source=/usr/share/code/resources/app/node_modules/@vscode/ripgrep/bin, dest=/home/fintrack/.vscode/extensions/github.copilot-chat-0.40.1/node_modules/@github/copilot/sdk/ripgrep/bin/linux-x64
+2026-03-18 17:19:32.777 [info] Found 1 entries to copy: pty.node
+2026-03-18 17:19:32.866 [info] Found 1 entries to copy: rg
+2026-03-18 17:19:32.873 [info] [CopilotCLI] MCP server started. Lock file: /home/fintrack/.copilot/ide/bc3b8c98-a2e6-4ccc-987f-ec0545dac12a.lock
+2026-03-18 17:19:32.873 [info] [CopilotCLI] Server URI: unix:/tmp/mcp-Mvhrvr/mcp.sock#%2Fmcp
+2026-03-18 17:19:34.971 [info] Logged in as anandmahajani1963
+2026-03-18 17:19:35.287 [info] Got Copilot token for anandmahajani1963
+2026-03-18 17:19:35.287 [info] Copilot Chat: 0.40.1, VS Code: 1.112.0
+2026-03-18 17:19:35.678 [info] [context keys] Setting context key: github.copilot-chat.activated
+2026-03-18 17:19:35.722 [info] activationBlocker from 'languageModelAccess' took for 4621ms
+2026-03-18 17:19:36.066 [info] Fetched model metadata in 4748ms 991f039e-382f-431c-959e-9702a1b7301a
+2026-03-18 17:19:36.285 [info] Latest entry: ccreq:latest.copilotmd
+2026-03-18 17:19:36.292 [info] ccreq:f6124469.copilotmd | markdown
+2026-03-18 17:19:37.193 [info] AuthenticationService: firing onDidAuthenticationChange from handleAuthChangeEvent. Has token: true
+2026-03-18 17:19:37.193 [info] copilot token sku: free_limited_copilot
+2026-03-18 17:19:37.193 [info] ConversationFeature: Activating contributions
+2026-03-18 17:19:37.193 [info] GitHub.vscode-pull-request-github extension is not yet activated.
+2026-03-18 17:19:37.454 [info] Registering default platform agent...
+2026-03-18 17:19:37.467 [info] ConversationFeature: onDidAuthenticationChange has token: true
+2026-03-18 17:19:37.468 [info] [code-referencing] Public code references are enabled.
+2026-03-18 17:19:37.477 [info] activationBlocker from 'conversationFeature' took for 6513ms
+2026-03-18 17:19:37.543 [info] GithubAvailableEmbeddingTypesManager: Got embeddings. Primary: metis-1024-I16-Binary. Deprecated: 
+2026-03-18 17:19:37.568 [info] WorkspaceChunkSearchService: using embedding type metis-1024-I16-Binary
+2026-03-18 17:19:37.804 [info] Fetched model metadata in 623ms fbfb8c73-576a-4587-8ba3-4fbdb44ef840
+2026-03-18 17:19:37.925 [error] [CopilotCLISession] Failed to fetch models: Error: 403 "unauthorized: not authorized to use this Copilot feature\n"
+2026-03-18 17:19:38.029 [info] BYOK: Copilot Chat known models list fetched successfully.
+2026-03-18 17:19:38.171 [info] ccreq:2db24143.copilotmd | markdown
+2026-03-18 21:05:21.708 [info] Logged in as anandmahajani1963
+2026-03-18 21:05:22.352 [info] Got Copilot token for anandmahajani1963
+2026-03-18 21:05:22.352 [info] Copilot Chat: 0.40.1, VS Code: 1.112.0
+2026-03-18 21:05:22.911 [info] AuthenticationService: firing onDidAuthenticationChange from handleAuthChangeEvent. Has token: true
+2026-03-18 21:05:22.911 [info] copilot token sku: free_limited_copilot
+2026-03-18 21:05:22.911 [info] ConversationFeature: onDidAuthenticationChange has token: true
+2026-03-18 21:05:22.911 [info] [code-referencing] Public code references are enabled.
+2026-03-18 21:05:23.039 [info] Fetched model metadata in 187ms 79be6a37-9552-47b2-9d4a-1c0f4e63e8eb
+2026-03-18 21:05:23.106 [info] ccreq:dc34dc93.copilotmd | markdown

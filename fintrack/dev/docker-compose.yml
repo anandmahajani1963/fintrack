@@ -1,0 +1,60 @@
+# ============================================================
+# fintrack — Dev VM (oel9-ccc-appdev.digilinx.us)
+# File: /home/fintrack/fintrack/dev/docker-compose.yml
+#
+# Usage:
+#   docker compose build          # build image
+#   docker compose up -d          # start
+#   docker compose logs -f        # get Jupyter URL with token
+#   docker compose down           # stop
+# ============================================================
+
+services:
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintrack_jupyter
+    restart: unless-stopped
+
+    environment:
+      # Database — for direct ad-hoc queries from notebooks
+      DB_HOST:     ${DB_HOST}
+      DB_PORT:     ${DB_PORT}
+      DB_NAME:     ${DB_NAME}
+      DB_USER:     ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # API VM — for testing endpoints from notebooks
+      API_HOST:    ${API_HOST}
+      API_PORT:    ${API_PORT}
+
+      # Jupyter password (set this in .env)
+      JUPYTER_PASSWORD: ${JUPYTER_PASSWORD}
+
+    ports:
+      # Bind to all interfaces — access from your workstation browser
+      - "0.0.0.0:8888:8888"
+
+    volumes:
+      # Notebooks persist on host — survive container rebuilds
+      - ./notebooks:/home/fintrack/notebooks
+      # Shared code (categorizer, importer) accessible in notebooks
+      - ./shared:/home/fintrack/shared
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+networks:
+  default:
+    name: fintrack_dev_net

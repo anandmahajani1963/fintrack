@@ -1,2 +1,5 @@
 [user]
 	name = Anand Mahajani
+	email = anandmahajani@gmail.com
+[credential]
+	helper = store

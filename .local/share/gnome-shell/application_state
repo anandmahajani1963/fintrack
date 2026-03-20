@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <application-state>
   <context id="">
-    <application id="gnome-control-center.desktop" score="1" last-seen="1773606764"/>
-    <application id="org.gnome.Terminal.desktop" score="140" last-seen="1773606749"/>
+    <application id="firefox.desktop" score="273.5" last-seen="1773868495"/>
+    <application id="code.desktop" score="58" last-seen="1773882321"/>
+    <application id="gnome-control-center.desktop" score="4.5" last-seen="1773869169"/>
+    <application id="org.gnome.Terminal.desktop" score="20408" last-seen="1773882135"/>
+    <application id="gnome-network-panel.desktop" score="0" last-seen="0"/>
+    <application id="org.gnome.Software.desktop" score="19" last-seen="1773868128"/>
   </context>
 </application-state>

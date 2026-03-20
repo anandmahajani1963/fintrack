@@ -1,0 +1,9 @@
+2026-03-18 17:13:17.738 [info] Started initializing default profile extensions in extensions installation folder. file:///home/fintrack/.vscode/extensions
+2026-03-18 17:13:20.450 [warning] Failed to create default profile extensions manifest in extensions installation folder. file:///home/fintrack/.vscode/extensions Unable to create file 'vscode-userdata:/home/fintrack/.vscode/extensions/extensions.json' that already exists when overwrite flag is not set
+2026-03-18 17:13:20.451 [info] Completed initializing default profile extensions in extensions installation folder. file:///home/fintrack/.vscode/extensions
+2026-03-18 17:14:42.358 [info] Getting Manifest... github.copilot-chat
+2026-03-18 17:14:42.834 [info] Installing extension: github.copilot-chat {"enable":true,"isApplicationScoped":true,"isMachineScoped":false,"installEverywhere":true,"installPreReleaseVersion":false,"pinned":false,"profileLocation":{"$mid":1,"external":"vscode-userdata:/home/fintrack/.vscode/extensions/extensions.json","path":"/home/fintrack/.vscode/extensions/extensions.json","scheme":"vscode-userdata"},"productVersion":{"version":"1.112.0","date":"2026-03-17T18:09:23Z"}}
+2026-03-18 17:18:59.467 [info] Extension signature verification result for github.copilot-chat: Success. Internal Code: 0. Executed: true. Duration: 252082ms.
+2026-03-18 17:19:03.007 [info] Extracted extension to file:///home/fintrack/.vscode/extensions/github.copilot-chat-0.40.1: github.copilot-chat
+2026-03-18 17:19:03.106 [info] Renamed to /home/fintrack/.vscode/extensions/github.copilot-chat-0.40.1
+2026-03-18 17:19:03.352 [info] Extension installed successfully: github.copilot-chat vscode-userdata:/home/fintrack/.vscode/extensions/extensions.json
