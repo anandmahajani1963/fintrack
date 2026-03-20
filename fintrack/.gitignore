@@ -58,3 +58,4 @@ test_output/
 .vboxclient-vmsvga-session-tty2-service.pid
 .viminfo
 
+.git-credentials
