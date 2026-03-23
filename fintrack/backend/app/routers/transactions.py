@@ -9,12 +9,18 @@
 #   GET  /api/v1/transactions/accounts — list user's card accounts
 # ============================================================
 
+# ============================================================
+# 2026/03/20 - Updated to fix over aggressive duplicate checks
+# in import of .csv
+# fintrack — Transactions router: /api/v1/transactions
+# File: backend/app/routers/transactions.py
+# ============================================================
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
 import logging
-import uuid
 
 from app.database import get_db
 from app.models.user import Account, UserKey
@@ -29,15 +35,13 @@ router = APIRouter()
 
 
 def _get_user_key(user_id, password: str, db: Session) -> bytes:
-    """Derive the user's encryption key from their password."""
     user_key = db.query(UserKey).filter(UserKey.user_id == user_id).first()
     if not user_key:
         raise HTTPException(status_code=500, detail="Encryption key material not found")
     return derive_key(password, bytes(user_key.kdf_salt))
 
 
-def _get_thresholds(user_id, db: Session) -> dict[str, float]:
-    """Load large-expense thresholds for user."""
+def _get_thresholds(user_id, db: Session) -> dict:
     rows = db.execute(
         text("SELECT category_name, threshold FROM expense_thresholds WHERE user_id = :uid"),
         {"uid": str(user_id)}
@@ -49,14 +53,9 @@ def _get_or_create_account(
     user_id, provider: str, member_name: str,
     encryption_key: bytes, db: Session
 ) -> Account:
-    """
-    Find an existing account matching provider + member, or create one.
-    account_label and member_name are stored encrypted.
-    """
-    # Load existing accounts and decrypt to find match
     accounts = db.query(Account).filter(
-        Account.user_id  == user_id,
-        Account.provider == provider,
+        Account.user_id   == user_id,
+        Account.provider  == provider,
         Account.is_active == True,
     ).all()
 
@@ -68,7 +67,6 @@ def _get_or_create_account(
         except Exception:
             continue
 
-    # Create new account
     label = f"{provider.title()} — {member_name}"
     acc = Account(
         user_id       = user_id,
@@ -83,23 +81,14 @@ def _get_or_create_account(
     return acc
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
-
 @router.post("/import", status_code=status.HTTP_201_CREATED)
 def import_csv(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-    file:     UploadFile = File(..., description="Credit card CSV file"),
-    provider: str        = Form(..., description="Card provider: citi, amex, or chase"),
-    password: str        = Form(..., description="Your fintrack password (for key derivation)"),
+    file:     UploadFile = File(...),
+    provider: str        = Form(..., description="citi, amex, or chase"),
+    password: str        = Form(..., description="Your fintrack password"),
 ):
-    """
-    Upload and import a credit card CSV file.
-
-    The password is used to derive the encryption key on the fly —
-    it is never stored. The key is used to encrypt merchant names
-    before writing to the database.
-    """
     provider = provider.lower().strip()
     if provider not in ("citi", "amex", "chase"):
         raise HTTPException(
@@ -107,22 +96,18 @@ def import_csv(
             detail="provider must be one of: citi, amex, chase",
         )
 
-    # Read file bytes
     file_bytes = file.file.read()
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-    # Derive encryption key from password
     try:
         enc_key = _get_user_key(current_user.id, password, db)
     except Exception:
         raise HTTPException(status_code=401, detail="Password incorrect")
 
-    # Load user categories and thresholds
     user_categories = get_user_categories(current_user.id, db)
     thresholds      = _get_thresholds(current_user.id, db)
 
-    # Parse CSV
     result = parse_csv(
         file_bytes      = file_bytes,
         filename        = file.filename,
@@ -135,20 +120,30 @@ def import_csv(
     if result.errors:
         raise HTTPException(status_code=422, detail=result.errors)
 
-    # Group rows by member and insert
-    inserted = 0
-    duplicates = 0
-    accounts_created = []
+    inserted       = 0
+    duplicates     = 0
+    accounts_cache = {}
 
     for row in result.rows:
-        # Get or create account for this member
-        account = _get_or_create_account(
-            current_user.id, provider, row.member_name, enc_key, db
-        )
-        if str(account.id) not in accounts_created:
-            accounts_created.append(str(account.id))
+        if row.member_name not in accounts_cache:
+            accounts_cache[row.member_name] = _get_or_create_account(
+                current_user.id, provider, row.member_name, enc_key, db
+            )
+        account = accounts_cache[row.member_name]
 
-        # Find category_id
+        # Duplicate check — plaintext fields only (description ciphertext
+        # differs every call due to random nonce so cannot be compared)
+        existing = db.query(Transaction).filter(
+            Transaction.account_id  == account.id,
+            Transaction.txn_date    == row.txn_date,
+            Transaction.amount      == row.amount,
+            Transaction.source_file == row.source_file,
+        ).first()
+
+        if existing:
+            duplicates += 1
+            continue
+
         cat = db.query(Category).filter(
             Category.user_id == current_user.id,
             Category.name    == row.category_name,
@@ -162,36 +157,32 @@ def import_csv(
             description   = row.description_enc,
             category_id   = cat.id if cat else None,
             category_name = row.category_name,
+            subcategory   = row.subcategory,
             is_essential  = row.is_essential,
             is_large      = row.is_large,
             source_file   = row.source_file,
             source_type   = "csv_import",
         )
-        try:
-            db.add(txn)
-            db.flush()
-            inserted += 1
-        except Exception:
-            db.rollback()
-            duplicates += 1
-            continue
+        db.add(txn)
+        inserted += 1
 
     db.commit()
 
     logger.info(
-        f"Import complete for user {current_user.email}: "
-        f"{inserted} inserted, {duplicates} duplicates skipped"
+        f"Import complete for {current_user.email}: "
+        f"{inserted} inserted, {duplicates} duplicates, "
+        f"{result.skipped_count} skipped"
     )
 
     return {
-        "status":        "success",
-        "file":          file.filename,
-        "provider":      provider,
-        "raw_rows":      result.raw_row_count,
-        "imported":      inserted,
-        "skipped":       result.skipped_count,
-        "duplicates":    duplicates,
-        "accounts":      len(accounts_created),
+        "status":     "success",
+        "file":       file.filename,
+        "provider":   provider,
+        "raw_rows":   result.raw_row_count,
+        "imported":   inserted,
+        "skipped":    result.skipped_count,
+        "duplicates": duplicates,
+        "accounts":   len(accounts_cache),
     }
 
 
@@ -201,10 +192,9 @@ def list_accounts(
     password: str = Query(..., description="Your fintrack password"),
     db: Session = Depends(get_db),
 ):
-    """List all card accounts for the current user (decrypted)."""
-    enc_key = _get_user_key(current_user.id, password, db)
+    enc_key  = _get_user_key(current_user.id, password, db)
     accounts = db.query(Account).filter(
-        Account.user_id  == current_user.id,
+        Account.user_id   == current_user.id,
         Account.is_active == True,
     ).all()
 
@@ -225,24 +215,20 @@ def list_accounts(
 def list_transactions(
     current_user: CurrentUser,
     password:  str           = Query(...),
-    year:      Optional[int] = Query(None, description="Filter by year"),
-    month:     Optional[int] = Query(None, description="Filter by month 1-12"),
+    year:      Optional[int] = Query(None),
+    month:     Optional[int] = Query(None),
     category:  Optional[str] = Query(None),
     is_large:  Optional[bool]= Query(None),
     page:      int           = Query(1, ge=1),
     page_size: int           = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
-    """
-    List transactions for the current user, paginated.
-    Merchant descriptions are decrypted in the response.
-    """
     enc_key = _get_user_key(current_user.id, password, db)
 
     query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
 
     if year:
-        query = query.filter(Transaction.year_num == year)
+        query = query.filter(Transaction.year_num  == year)
     if month:
         query = query.filter(Transaction.month_num == month)
     if category:
@@ -263,14 +249,14 @@ def list_transactions(
         "pages":     (total + page_size - 1) // page_size,
         "items": [
             {
-                "id":          str(t.id),
-                "date":        t.txn_date.isoformat(),
-                "amount":      float(t.amount),
-                "description": decrypt(t.description, enc_key),
-                "category":    t.category_name,
-                "is_essential":t.is_essential,
-                "is_large":    t.is_large,
-                "source_file": t.source_file,
+                "id":           str(t.id),
+                "date":         t.txn_date.isoformat(),
+                "amount":       float(t.amount),
+                "description":  decrypt(t.description, enc_key),
+                "category":     t.category_name,
+                "is_essential": t.is_essential,
+                "is_large":     t.is_large,
+                "source_file":  t.source_file,
             }
             for t in rows
         ],

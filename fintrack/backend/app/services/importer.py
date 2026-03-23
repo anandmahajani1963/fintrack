@@ -1,5 +1,5 @@
 # ============================================================
-# fintrack — CSV importer service
+# fintrack — CSV importer service (v02)
 # File: backend/app/services/importer.py
 #
 # Ported from analyze_credit_cards.py with these changes:
@@ -10,6 +10,7 @@
 # ============================================================
 
 import io
+import hashlib
 import pandas as pd
 from dataclasses import dataclass, field
 from typing import Optional
@@ -59,6 +60,7 @@ class ImportedRow:
     description_enc: str      # encrypted merchant name
     description_plain: str    # plaintext — used for categorization, not stored
     category_name: str
+    subcategory:   str
     is_essential:  bool
     is_large:      bool
     member_name:   str
@@ -185,7 +187,7 @@ def parse_csv(
             continue
 
         # Categorize from plaintext description
-        cat_name, is_essential = infer_category(desc, user_categories)
+        cat_name, subcat, is_essential = infer_category(desc, user_categories)
 
         # Large expense flag
         is_large = apply_large_expense_flag(amount, cat_name, thresholds)
@@ -199,6 +201,7 @@ def parse_csv(
             description_enc   = desc_enc,
             description_plain = desc,
             category_name     = cat_name,
+            subcategory       = subcat,
             is_essential      = is_essential,
             is_large          = is_large,
             member_name       = member,
