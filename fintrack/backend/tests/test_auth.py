@@ -13,7 +13,7 @@ client = TestClient(app)
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
-TEST_EMAIL    = "testuser@fintrack.test"
+TEST_EMAIL    = "testuser@fintrack-app.com"
 TEST_PASSWORD = "TestPass123!"
 
 

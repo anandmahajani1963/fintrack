@@ -58,3 +58,6 @@ CMD ["uvicorn", "app.main:app", \
      "--port", "8000", \
      "--workers", "2", \
      "--log-level", "info"]
+
+# Copy test suite
+COPY tests/ ./tests/

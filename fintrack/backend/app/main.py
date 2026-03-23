@@ -58,12 +58,12 @@ app.add_middleware(
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from app.routers import auth, transactions
+from app.routers import auth, transactions, analytics
 app.include_router(auth.router,         prefix="/api/v1/auth",         tags=["auth"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 # Coming next:
 # from app.routers import accounts, analytics, insights
-# app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
+app.include_router(analytics.router,    prefix="/api/v1/analytics",    tags=["analytics"])
 
 
 # ── Core endpoints ─────────────────────────────────────────────────────────────
