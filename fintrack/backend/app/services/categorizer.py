@@ -1,6 +1,16 @@
 # ============================================================
-# fintrack — Categorizer service (subcategory-aware) (v03)
+# fintrack — Categorizer service
 # File: backend/app/services/categorizer.py
+#
+# Version History:
+#   v1.0  2026-03-18  Initial — flat category keyword matching
+#   v1.1  2026-03-22  Added subcategory support; returns 3-tuple
+#                     (category, subcategory, is_essential)
+#   v1.2  2026-03-23  Added PHARMACY_RULES for Publix/Kroger Rx override
+#                     Added MERCHANT_OVERRIDES for known merchants that
+#                     keyword matching misses (Suvidha, Citgo, Flippin Pizza
+#                     GDP*Bernas Canine, Ruby Falls, etc.)
+#                     Priority order: pharmacy → costco → merchant → keyword
 # ============================================================
 
 from sqlalchemy.orm import Session

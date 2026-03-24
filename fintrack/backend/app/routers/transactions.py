@@ -2,18 +2,18 @@
 # fintrack — Transactions router: /api/v1/transactions
 # File: backend/app/routers/transactions.py
 #
+# Version History:
+#   v1.0  2026-03-18  Initial implementation — import, list, accounts endpoints
+#   v1.1  2026-03-20  Fixed: generated column error (month_num, year_num)
+#   v1.2  2026-03-22  Fixed: duplicate detection logic rewritten (no per-row
+#                     try/except rollback; uses pre-check query instead)
+#   v1.3  2026-03-23  Added subcategory to Transaction insert
+#                     Fixed: subcategory was missing from constructor call
+#
 # Endpoints:
-#   POST /api/v1/transactions/import   — upload and import a CSV file
-#   GET  /api/v1/transactions          — list transactions (paginated)
-#   GET  /api/v1/transactions/{id}     — single transaction (decrypted)
-#   GET  /api/v1/transactions/accounts — list user's card accounts
-# ============================================================
-
-# ============================================================
-# 2026/03/20 - Updated to fix over aggressive duplicate checks
-# in import of .csv
-# fintrack — Transactions router: /api/v1/transactions
-# File: backend/app/routers/transactions.py
+#   POST /api/v1/transactions/import    upload and import a CSV file
+#   GET  /api/v1/transactions           list transactions (paginated, decrypted)
+#   GET  /api/v1/transactions/accounts  list card accounts (decrypted)
 # ============================================================
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, status

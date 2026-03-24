@@ -2,11 +2,18 @@
 # fintrack — Auth router: /api/v1/auth
 # File: backend/app/routers/auth.py
 #
+# Version History:
+#   v1.0  2026-03-18  Initial implementation
+#                     register, login, refresh, /me endpoints
+#                     Argon2id password hashing, JWT access + refresh tokens
+#                     Zero-knowledge key derivation (kdf_salt + key_check)
+#                     Default categories seeded on registration
+#
 # Endpoints:
-#   POST /api/v1/auth/register   — create new user + key material
-#   POST /api/v1/auth/login      — authenticate, return tokens
-#   POST /api/v1/auth/refresh    — exchange refresh token for new access token
-#   GET  /api/v1/auth/me         — return current user info
+#   POST /api/v1/auth/register   create account + seed categories
+#   POST /api/v1/auth/login      authenticate, return tokens
+#   POST /api/v1/auth/refresh    exchange refresh token for new access token
+#   GET  /api/v1/auth/me         return current user profile
 # ============================================================
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request

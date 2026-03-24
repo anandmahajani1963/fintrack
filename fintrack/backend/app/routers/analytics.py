@@ -2,16 +2,29 @@
 # fintrack — Analytics router: /api/v1/analytics
 # File: backend/app/routers/analytics.py
 #
+# Version History:
+#   v1.0  2026-03-18  Initial implementation — six analytics endpoints
+#   v1.1  2026-03-23  Fixed JOIN multiplication bug causing inflated totals
+#                     Root cause: LEFT JOIN on categories matched multiple rows
+#                     per transaction (one per subcategory with same name).
+#                     Fix: removed JOIN from all aggregate queries; category
+#                     metadata (is_essential, color_code) now fetched separately
+#                     via _get_cat_meta() and merged in Python.
+#                     Result: grand total now correctly matches source data.
+#   v1.2  2026-03-23  Added threshold default ($200) to large-expenses endpoint
+#                     Added threshold value to large-expenses response
+#                     Rounded all monetary amounts to 2 decimal places
+#
 # Endpoints:
 #   GET /api/v1/analytics/monthly-pivot      monthly spend by category x month
 #   GET /api/v1/analytics/category-summary   totals + % + essential split
-#   GET /api/v1/analytics/trend              month-over-month totals
-#   GET /api/v1/analytics/essential-split    essential vs non-essential
+#   GET /api/v1/analytics/trend              month-over-month totals + MoM delta
+#   GET /api/v1/analytics/essential-split    essential vs non-essential by month
 #   GET /api/v1/analytics/large-expenses     transactions above threshold
 #   GET /api/v1/analytics/utility-seasonal   seasonal utility breakdown
 # ============================================================
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
@@ -29,8 +42,26 @@ router = APIRouter()
 def _get_enc_key(user_id, password: str, db: Session) -> bytes:
     user_key = db.query(UserKey).filter(UserKey.user_id == user_id).first()
     if not user_key:
-        raise Exception("Key material not found")
+        raise HTTPException(status_code=500, detail="Key material not found")
     return derive_key(password, bytes(user_key.kdf_salt))
+
+
+# ── Shared category metadata helper ──────────────────────────────────────────
+# Fetches is_essential and color_code per (category, subcategory) in one query.
+# Avoids the JOIN-multiplication bug where multiple category rows inflate totals.
+
+def _get_cat_meta(user_id, db: Session) -> dict:
+    """Returns {(category_name, subcategory): {is_essential, color_code}}"""
+    rows = db.execute(text("""
+        SELECT name, subcategory, is_essential, color_code
+        FROM categories
+        WHERE user_id = :uid
+    """), {"uid": str(user_id)}).fetchall()
+    meta = {}
+    for r in rows:
+        key = (r.name, r.subcategory or r.name)
+        meta[key] = {"is_essential": r.is_essential, "color_code": r.color_code or "#9E9E9E"}
+    return meta
 
 
 # ── 1. Monthly Pivot ──────────────────────────────────────────────────────────
@@ -38,82 +69,64 @@ def _get_enc_key(user_id, password: str, db: Session) -> bytes:
 @router.get("/monthly-pivot")
 def monthly_pivot(
     current_user: CurrentUser,
-    year:     Optional[int] = Query(None, description="Filter by year"),
+    year: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    """
-    Monthly spend by category and subcategory.
-    Returns data shaped for a pivot table: categories as rows, months as columns.
-    """
+    """Monthly spend by category/subcategory. Categories as rows, months as columns."""
     params = {"uid": str(current_user.id)}
     year_filter = "AND t.year_num = :year" if year else ""
     if year:
         params["year"] = year
 
+    # Query transactions directly — no JOIN to avoid row multiplication
     rows = db.execute(text(f"""
         SELECT
             t.year_num,
             t.month_num,
             TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
             t.category_name,
-            COALESCE(t.subcategory, t.category_name)             AS subcategory,
-            c.is_essential,
-            c.color_code,
-            SUM(t.amount)                                         AS total_amount,
-            COUNT(*)                                              AS txn_count
+            COALESCE(t.subcategory, t.category_name) AS subcategory,
+            SUM(t.amount)  AS total_amount,
+            COUNT(*)       AS txn_count
         FROM transactions t
-        LEFT JOIN categories c
-            ON c.user_id = t.user_id AND c.name = t.category_name
         WHERE t.user_id = :uid
         {year_filter}
         GROUP BY t.year_num, t.month_num, t.txn_date,
-                 t.category_name, t.subcategory,
-                 c.is_essential, c.color_code
+                 t.category_name, t.subcategory
         ORDER BY t.year_num, t.month_num, t.category_name
     """), params).fetchall()
 
-    # Build pivot structure: {category: {month: amount}}
-    months_seen  = {}   # month_label -> (year_num, month_num) for ordering
-    pivot        = {}   # (category, subcategory) -> {month_label: amount}
-    cat_meta     = {}   # (category, subcategory) -> {is_essential, color_code}
+    cat_meta = _get_cat_meta(current_user.id, db)
+
+    months_seen = {}
+    pivot       = {}
 
     for row in rows:
         key   = (row.category_name, row.subcategory)
         month = row.month_label
-
         if month not in months_seen:
             months_seen[month] = (row.year_num, row.month_num)
         if key not in pivot:
-            pivot[key]    = {}
-            cat_meta[key] = {
-                "is_essential": row.is_essential,
-                "color_code":   row.color_code or "#9E9E9E",
-            }
+            pivot[key] = {}
         pivot[key][month] = pivot[key].get(month, 0) + float(row.total_amount)
 
-    # Sort months chronologically
-    sorted_months = sorted(months_seen.keys(),
-                           key=lambda m: months_seen[m])
+    sorted_months = sorted(months_seen.keys(), key=lambda m: months_seen[m])
 
-    # Build response rows
     result_rows = []
     for (cat, subcat), month_data in sorted(pivot.items()):
+        meta      = cat_meta.get((cat, subcat), {"is_essential": False, "color_code": "#9E9E9E"})
         row_total = sum(month_data.values())
         result_rows.append({
             "category":    cat,
             "subcategory": subcat,
-            "is_essential":cat_meta[(cat, subcat)]["is_essential"],
-            "color_code":  cat_meta[(cat, subcat)]["color_code"],
+            "is_essential":meta["is_essential"],
+            "color_code":  meta["color_code"],
             "months":      {m: round(month_data.get(m, 0), 2) for m in sorted_months},
             "row_total":   round(row_total, 2),
         })
 
-    # Sort by row_total descending
     result_rows.sort(key=lambda r: r["row_total"], reverse=True)
-
-    # Column totals
-    col_totals = {m: round(sum(r["months"].get(m, 0) for r in result_rows), 2)
-                  for m in sorted_months}
+    col_totals  = {m: round(sum(r["months"].get(m, 0) for r in result_rows), 2) for m in sorted_months}
     grand_total = round(sum(col_totals.values()), 2)
 
     return {
@@ -129,13 +142,10 @@ def monthly_pivot(
 @router.get("/category-summary")
 def category_summary(
     current_user: CurrentUser,
-    year:     Optional[int] = Query(None),
+    year: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    """
-    Total spend per category and subcategory with % of total.
-    Includes essential vs non-essential split.
-    """
+    """Total spend per category/subcategory with % of total and essential split."""
     params = {"uid": str(current_user.id)}
     year_filter = "AND t.year_num = :year" if year else ""
     if year:
@@ -145,43 +155,42 @@ def category_summary(
         SELECT
             t.category_name,
             COALESCE(t.subcategory, t.category_name) AS subcategory,
-            COALESCE(c.is_essential, false)           AS is_essential,
-            COALESCE(c.color_code, '#9E9E9E')         AS color_code,
-            SUM(t.amount)                             AS total_amount,
-            COUNT(*)                                  AS txn_count,
-            ROUND(SUM(t.amount) * 100.0 /
-                SUM(SUM(t.amount)) OVER (), 2)        AS pct_of_total
+            SUM(t.amount)  AS total_amount,
+            COUNT(*)       AS txn_count
         FROM transactions t
-        LEFT JOIN categories c
-            ON c.user_id = t.user_id AND c.name = t.category_name
         WHERE t.user_id = :uid
         {year_filter}
-        GROUP BY t.category_name, t.subcategory, c.is_essential, c.color_code
+        GROUP BY t.category_name, t.subcategory
         ORDER BY total_amount DESC
     """), params).fetchall()
 
-    grand_total    = sum(float(r.total_amount) for r in rows)
-    essential_total    = sum(float(r.total_amount) for r in rows if r.is_essential)
+    cat_meta    = _get_cat_meta(current_user.id, db)
+    grand_total = sum(float(r.total_amount) for r in rows)
+
+    categories = []
+    for r in rows:
+        meta = cat_meta.get((r.category_name, r.subcategory),
+                            {"is_essential": False, "color_code": "#9E9E9E"})
+        categories.append({
+            "category":    r.category_name,
+            "subcategory": r.subcategory,
+            "is_essential":meta["is_essential"],
+            "color_code":  meta["color_code"],
+            "total":       round(float(r.total_amount), 2),
+            "txn_count":   r.txn_count,
+            "pct":         round(float(r.total_amount) * 100 / grand_total, 2) if grand_total else 0,
+        })
+
+    essential_total    = sum(c["total"] for c in categories if c["is_essential"])
     nonessential_total = grand_total - essential_total
 
     return {
-        "grand_total":         round(grand_total, 2),
-        "essential_total":     round(essential_total, 2),
-        "nonessential_total":  round(nonessential_total, 2),
-        "essential_pct":       round(essential_total * 100 / grand_total, 1) if grand_total else 0,
-        "nonessential_pct":    round(nonessential_total * 100 / grand_total, 1) if grand_total else 0,
-        "categories": [
-            {
-                "category":    r.category_name,
-                "subcategory": r.subcategory,
-                "is_essential":r.is_essential,
-                "color_code":  r.color_code,
-                "total":       round(float(r.total_amount), 2),
-                "txn_count":   r.txn_count,
-                "pct":         round(float(r.pct_of_total), 2),
-            }
-            for r in rows
-        ],
+        "grand_total":        round(grand_total, 2),
+        "essential_total":    round(essential_total, 2),
+        "nonessential_total": round(nonessential_total, 2),
+        "essential_pct":      round(essential_total * 100 / grand_total, 1) if grand_total else 0,
+        "nonessential_pct":   round(nonessential_total * 100 / grand_total, 1) if grand_total else 0,
+        "categories":         categories,
     }
 
 
@@ -191,14 +200,11 @@ def category_summary(
 def trend(
     current_user: CurrentUser,
     year:     Optional[int] = Query(None),
-    category: Optional[str] = Query(None, description="Filter to one category"),
+    category: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    """
-    Month-over-month total spend. Optionally filtered to one category.
-    Includes month-over-month delta and % change.
-    """
-    params = {"uid": str(current_user.id)}
+    """Month-over-month total spend with delta and % change."""
+    params  = {"uid": str(current_user.id)}
     filters = []
     if year:
         filters.append("AND t.year_num = :year")
@@ -212,8 +218,8 @@ def trend(
             t.year_num,
             t.month_num,
             TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
-            SUM(t.amount)  AS total_amount,
-            COUNT(*)       AS txn_count
+            SUM(t.amount) AS total_amount,
+            COUNT(*)      AS txn_count
         FROM transactions t
         WHERE t.user_id = :uid
         {' '.join(filters)}
@@ -221,7 +227,7 @@ def trend(
         ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
-    result = []
+    result      = []
     prev_amount = None
     for row in rows:
         amount = round(float(row.total_amount), 2)
@@ -231,25 +237,24 @@ def trend(
         else:
             delta  = 0
             change = 0
-
         result.append({
-            "month":       row.month_label,
-            "year":        row.year_num,
-            "month_num":   row.month_num,
-            "total":       amount,
-            "txn_count":   row.txn_count,
-            "mom_delta":   delta,
-            "mom_pct":     change,
+            "month":     row.month_label,
+            "year":      row.year_num,
+            "month_num": row.month_num,
+            "total":     amount,
+            "txn_count": row.txn_count,
+            "mom_delta": delta,
+            "mom_pct":   change,
         })
         prev_amount = amount
 
     avg = round(sum(r["total"] for r in result) / len(result), 2) if result else 0
 
     return {
-        "category":    category or "All",
-        "months":      result,
-        "average":     avg,
-        "total":       round(sum(r["total"] for r in result), 2),
+        "category": category or "All",
+        "months":   result,
+        "average":  avg,
+        "total":    round(sum(r["total"] for r in result), 2),
     }
 
 
@@ -262,11 +267,8 @@ def essential_split(
     month: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    """
-    Essential vs non-essential breakdown by month.
-    Returns monthly bars suitable for a stacked chart.
-    """
-    params = {"uid": str(current_user.id)}
+    """Essential vs non-essential monthly breakdown for stacked chart."""
+    params  = {"uid": str(current_user.id)}
     filters = []
     if year:
         filters.append("AND t.year_num = :year")
@@ -275,47 +277,45 @@ def essential_split(
         filters.append("AND t.month_num = :month")
         params["month"] = month
 
+    cat_meta = _get_cat_meta(current_user.id, db)
+
     rows = db.execute(text(f"""
         SELECT
             t.year_num,
             t.month_num,
             TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
-            COALESCE(c.is_essential, false)                       AS is_essential,
-            SUM(t.amount)                                         AS total_amount,
-            COUNT(*)                                              AS txn_count
+            t.category_name,
+            COALESCE(t.subcategory, t.category_name) AS subcategory,
+            SUM(t.amount) AS total_amount,
+            COUNT(*)      AS txn_count
         FROM transactions t
-        LEFT JOIN categories c
-            ON c.user_id = t.user_id AND c.name = t.category_name
         WHERE t.user_id = :uid
         {' '.join(filters)}
-        GROUP BY t.year_num, t.month_num, t.txn_date, c.is_essential
-        ORDER BY t.year_num, t.month_num, is_essential DESC
+        GROUP BY t.year_num, t.month_num, t.txn_date, t.category_name, t.subcategory
+        ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
-    # Pivot into {month: {essential: x, nonessential: y}}
     months = {}
     for row in rows:
-        m = row.month_label
+        m    = row.month_label
+        meta = cat_meta.get((row.category_name, row.subcategory), {"is_essential": False})
         if m not in months:
-            months[m] = {"month": m, "year": row.year_num,
-                         "month_num": row.month_num,
+            months[m] = {"month": m, "year": row.year_num, "month_num": row.month_num,
                          "essential": 0, "nonessential": 0,
                          "essential_txns": 0, "nonessential_txns": 0}
-        if row.is_essential:
-            months[m]["essential"]      += round(float(row.total_amount), 2)
-            months[m]["essential_txns"] += row.txn_count
+        if meta["is_essential"]:
+            months[m]["essential"]       += round(float(row.total_amount), 2)
+            months[m]["essential_txns"]  += row.txn_count
         else:
             months[m]["nonessential"]      += round(float(row.total_amount), 2)
             months[m]["nonessential_txns"] += row.txn_count
 
     result = sorted(months.values(), key=lambda r: (r["year"], r["month_num"]))
-
-    # Add totals and percentages
     for r in result:
         total = r["essential"] + r["nonessential"]
-        r["total"]             = round(total, 2)
-        r["essential_pct"]     = round(r["essential"] * 100 / total, 1) if total else 0
-        r["nonessential_pct"]  = round(r["nonessential"] * 100 / total, 1) if total else 0
+        r["total"]            = round(total, 2)
+        r["essential_pct"]    = round(r["essential"] * 100 / total, 1) if total else 0
+        r["nonessential_pct"] = round(r["nonessential"] * 100 / total, 1) if total else 0
 
     return {"months": result}
 
@@ -325,51 +325,46 @@ def essential_split(
 @router.get("/large-expenses")
 def large_expenses(
     current_user: CurrentUser,
-    password:  str           = Query(..., description="Your fintrack password"),
-    year:      Optional[int] = Query(None),
-    threshold: Optional[float] = Query(None,
-        description="Override threshold — default uses stored thresholds"),
+    password:  str            = Query(..., description="Your fintrack password"),
+    year:      Optional[int]  = Query(None),
+    threshold: Optional[float]= Query(None, description="Minimum amount — default $200"),
     db: Session = Depends(get_db),
 ):
     """
-    List large expenses with decrypted descriptions.
-    Sorted by amount descending.
+    Large expenses with decrypted descriptions, sorted by amount descending.
+    Password is required only to decrypt merchant names — sent as query param
+    over HTTPS (acceptable for Phase 1; will move to header in Phase 2).
     """
-    enc_key = _get_enc_key(current_user.id, password, db)
+    enc_key   = _get_enc_key(current_user.id, password, db)
+    min_amount = threshold if threshold is not None else 200.0
 
-    params  = {"uid": str(current_user.id)}
-    filters = []
+    params  = {"uid": str(current_user.id), "min_amount": min_amount}
+    filters = ["AND t.amount >= :min_amount"]
     if year:
         filters.append("AND t.year_num = :year")
         params["year"] = year
-    if threshold:
-        filters.append("AND t.amount >= :threshold")
-        params["threshold"] = threshold
-        amount_filter = ""
-    else:
-        amount_filter = "AND t.is_large = true"
 
     rows = db.execute(text(f"""
         SELECT
             t.id,
             t.txn_date,
-            t.amount,
+            ROUND(t.amount, 2)                           AS amount,
             t.description,
             t.category_name,
-            COALESCE(t.subcategory, t.category_name) AS subcategory,
+            COALESCE(t.subcategory, t.category_name)     AS subcategory,
             t.is_essential,
             a.provider
         FROM transactions t
         JOIN accounts a ON a.id = t.account_id
         WHERE t.user_id = :uid
-        {amount_filter}
         {' '.join(filters)}
         ORDER BY t.amount DESC
         LIMIT 100
     """), params).fetchall()
 
     return {
-        "count": len(rows),
+        "count":     len(rows),
+        "threshold": min_amount,
         "items": [
             {
                 "id":          str(r.id),
@@ -386,76 +381,65 @@ def large_expenses(
     }
 
 
-# ── 6. Utility Seasonal Breakdown ─────────────────────────────────────────────
+# ── 6. Utility Seasonal ───────────────────────────────────────────────────────
 
 @router.get("/utility-seasonal")
 def utility_seasonal(
     current_user: CurrentUser,
-    year:     Optional[int] = Query(None),
+    year: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    """
-    Seasonal utility spend breakdown by utility type and month.
-    Flags months that are above the yearly average for that utility type.
-    Used for identifying seasonal consumption patterns and optimization.
-    """
-    params = {"uid": str(current_user.id)}
+    """Seasonal utility spend by utility type. Flags above-average months."""
+    params      = {"uid": str(current_user.id)}
     year_filter = "AND t.year_num = :year" if year else ""
     if year:
         params["year"] = year
 
     rows = db.execute(text(f"""
-        WITH utility_monthly AS (
+        WITH um AS (
             SELECT
                 t.year_num,
                 t.month_num,
                 TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
-                COALESCE(t.subcategory, 'Other Utility')              AS utility_type,
-                SUM(t.amount)                                         AS total_amount,
-                COUNT(*)                                              AS txn_count
+                COALESCE(t.subcategory, 'Other Utility') AS utility_type,
+                SUM(t.amount) AS total_amount,
+                COUNT(*)      AS txn_count
             FROM transactions t
             WHERE t.user_id = :uid
               AND t.category_name = 'Utilities'
               {year_filter}
             GROUP BY t.year_num, t.month_num, t.txn_date, t.subcategory
         ),
-        utility_averages AS (
-            SELECT
-                year_num,
-                utility_type,
-                AVG(total_amount) AS yearly_avg
-            FROM utility_monthly
-            GROUP BY year_num, utility_type
+        ua AS (
+            SELECT year_num, utility_type, AVG(total_amount) AS yearly_avg
+            FROM um GROUP BY year_num, utility_type
         )
         SELECT
-            um.year_num,
-            um.month_num,
-            um.month_label,
-            um.utility_type,
-            um.total_amount,
-            um.txn_count,
-            ua.yearly_avg,
-            CASE WHEN um.total_amount > ua.yearly_avg
-                 THEN true ELSE false END AS above_average,
+            um.year_num, um.month_num, um.month_label,
+            um.utility_type, um.total_amount, um.txn_count,
+            ROUND(ua.yearly_avg::NUMERIC, 2) AS yearly_avg,
+            CASE WHEN um.total_amount > ua.yearly_avg THEN true ELSE false END AS above_average,
             ROUND((um.total_amount - ua.yearly_avg) * 100.0
-                  / NULLIF(ua.yearly_avg, 0), 1)  AS pct_vs_avg
-        FROM utility_monthly um
-        JOIN utility_averages ua
-            ON ua.year_num = um.year_num
-            AND ua.utility_type = um.utility_type
+                  / NULLIF(ua.yearly_avg, 0), 1) AS pct_vs_avg
+        FROM um
+        JOIN ua ON ua.year_num = um.year_num AND ua.utility_type = um.utility_type
         ORDER BY um.utility_type, um.year_num, um.month_num
     """), params).fetchall()
 
-    # Group by utility type
+    seasonal_notes = {
+        "Electric":          "Typically peaks in summer (AC) and winter (heating)",
+        "Water & Sewer":     "Typically peaks spring-summer (lawn/irrigation)",
+        "Gas & Heating":     "Typically peaks winter (heating)",
+        "Internet & Cable":  "Fixed cost — minimal seasonal variation expected",
+        "Waste & Sanitation":"Fixed cost — minimal seasonal variation expected",
+        "Home Security":     "Fixed cost — minimal seasonal variation expected",
+    }
+
     by_type = {}
     for row in rows:
         ut = row.utility_type
         if ut not in by_type:
-            by_type[ut] = {
-                "utility_type":  ut,
-                "yearly_avg":    round(float(row.yearly_avg), 2),
-                "months":        [],
-            }
+            by_type[ut] = {"utility_type": ut, "yearly_avg": float(row.yearly_avg), "months": []}
         by_type[ut]["months"].append({
             "month":         row.month_label,
             "month_num":     row.month_num,
@@ -465,22 +449,12 @@ def utility_seasonal(
             "pct_vs_avg":    float(row.pct_vs_avg) if row.pct_vs_avg else 0,
         })
 
-    # Add seasonal insight per utility type
-    seasonal_notes = {
-        "Electric":         "Typically peaks in summer (AC) and winter (heating)",
-        "Water & Sewer":    "Typically peaks spring-summer (lawn/irrigation)",
-        "Gas & Heating":    "Typically peaks winter (heating)",
-        "Internet & Cable": "Fixed cost — minimal seasonal variation expected",
-        "Waste & Sanitation":"Fixed cost — minimal seasonal variation expected",
-        "Home Security":    "Fixed cost — minimal seasonal variation expected",
-    }
-
     result = list(by_type.values())
     for item in result:
         item["seasonal_note"] = seasonal_notes.get(item["utility_type"], "")
 
     return {
-        "utility_types": result,
+        "utility_types":       result,
         "total_utility_spend": round(
             sum(m["amount"] for ut in result for m in ut["months"]), 2
         ),

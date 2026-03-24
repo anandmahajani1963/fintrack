@@ -1,12 +1,15 @@
 # ============================================================
-# fintrack — CSV importer service (v02)
+# fintrack — CSV Importer service
 # File: backend/app/services/importer.py
 #
-# Ported from analyze_credit_cards.py with these changes:
-#   - Returns structured ImportResult instead of writing Excel
-#   - Encrypts description before returning rows
-#   - Deduplication check against existing DB records
-#   - Supports Citi, AmEx, Chase (sign-flip logic preserved)
+# Version History:
+#   v1.0  2026-03-18  Initial — Citi, AmEx, Chase CSV parsing
+#                     Sign-flip logic for Chase (purchases negative)
+#                     Member detection from account number column
+#   v1.1  2026-03-23  Added subcategory field to ImportedRow dataclass
+#                     Updated infer_category unpack from 2 to 3 values
+#
+# Supported providers: citi, amex, chase
 # ============================================================
 
 import io

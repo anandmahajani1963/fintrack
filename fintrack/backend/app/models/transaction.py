@@ -1,3 +1,16 @@
+# ============================================================
+# fintrack — SQLAlchemy models: Transaction, Category, ExpenseThreshold
+# File: backend/app/models/transaction.py
+#
+# Version History:
+#   v1.0  2026-03-18  Initial implementation
+#   v1.1  2026-03-20  Fixed: month_num and year_num declared as Computed()
+#                     columns so SQLAlchemy excludes them from INSERT/UPDATE.
+#                     PostgreSQL generates these from txn_date automatically.
+#   v1.2  2026-03-23  Added subcategory and parent_category to Category model
+#                     Added subcategory to Transaction model
+# ============================================================
+
 from sqlalchemy import (
     Column, String, Boolean, DateTime, Date, Numeric,
     SmallInteger, Text, ForeignKey, ARRAY, func, Computed
@@ -5,27 +18,31 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
+
 from app.database import Base
 
 
 class Category(Base):
     __tablename__ = "categories"
 
-    id               = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id          = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
-                              nullable=False, index=True)
-    name             = Column(String, nullable=False)
+    id           = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id      = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
+                          nullable=False, index=True)
+    name         = Column(String, nullable=False)
+    is_essential = Column(Boolean, nullable=False, default=False)
+    color_code   = Column(String, nullable=False, default="#808080")
+    keywords     = Column(ARRAY(Text), nullable=False, default=list)
+    sort_order   = Column(SmallInteger, nullable=False, default=99)
     subcategory      = Column(String, nullable=True)
     parent_category  = Column(String, nullable=True)
-    is_essential     = Column(Boolean, nullable=False, default=False)
-    color_code       = Column(String, nullable=False, default="#808080")
-    keywords         = Column(ARRAY(Text), nullable=False, default=list)
-    sort_order       = Column(SmallInteger, nullable=False, default=99)
-    created_at       = Column(DateTime(timezone=True), server_default=func.now())
+    created_at   = Column(DateTime(timezone=True), server_default=func.now())
 
     user         = relationship("User", back_populates="categories")
     transactions = relationship("Transaction", back_populates="category_rel",
                                 foreign_keys="Transaction.category_id")
+
+    def __repr__(self):
+        return f"<Category name={self.name} essential={self.is_essential}>"
 
 
 class Transaction(Base):
@@ -37,16 +54,20 @@ class Transaction(Base):
     user_id       = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
                            nullable=False, index=True)
     txn_date      = Column(Date, nullable=False)
+
+    # GENERATED ALWAYS columns — PostgreSQL computes these from txn_date.
+    # Computed(persisted=True) tells SQLAlchemy to never include them in
+    # INSERT or UPDATE statements; read them back after commit.
     month_num     = Column(SmallInteger,
                            Computed("EXTRACT(MONTH FROM txn_date)::SMALLINT", persisted=True))
     year_num      = Column(SmallInteger,
-                           Computed("EXTRACT(YEAR FROM txn_date)::SMALLINT", persisted=True))
+                           Computed("EXTRACT(YEAR FROM txn_date)::SMALLINT",  persisted=True))
+
     amount        = Column(Numeric(12, 2), nullable=False)
-    description   = Column(Text, nullable=False)
+    description   = Column(Text, nullable=False)        # encrypted
     category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id",
                            ondelete="SET NULL"), nullable=True)
     category_name = Column(String, nullable=False, default="Other")
-    subcategory   = Column(String, nullable=True)
     is_essential  = Column(Boolean, nullable=False, default=False)
     is_large      = Column(Boolean, nullable=False, default=False)
     source_file   = Column(String, nullable=True)
@@ -56,6 +77,9 @@ class Transaction(Base):
     account      = relationship("Account",  back_populates="transactions")
     category_rel = relationship("Category", back_populates="transactions",
                                 foreign_keys=[category_id])
+
+    def __repr__(self):
+        return f"<Transaction date={self.txn_date} amount={self.amount} cat={self.category_name}>"
 
 
 class ExpenseThreshold(Base):
