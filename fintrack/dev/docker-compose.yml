@@ -30,7 +30,9 @@ services:
       API_PORT:    ${API_PORT}
 
       # Jupyter password (set this in .env)
-      JUPYTER_PASSWORD: ${JUPYTER_PASSWORD}
+      JUPYTER_PASSWORD:  ${JUPYTER_PASSWORD}
+      FINTRACK_EMAIL:    ${FINTRACK_EMAIL}
+      FINTRACK_PASSWORD: ${FINTRACK_PASSWORD}
 
     ports:
       # Bind to all interfaces — access from your workstation browser
