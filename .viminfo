@@ -10,17 +10,38 @@
 
 # hlsearch on (H) or off (h):
 ~H
+# Last Search Pattern:
+~MSle0~/log_
+
 # Command Line History (newest to oldest):
+:x
+|2,0,1774810536,,"x"
 :q
-|2,0,1773882625,,"q"
+|2,0,1774810486,,"q"
 :1
-|2,0,1773807540,,"1"
+|2,0,1774808637,,"1"
+:q!
+|2,0,1774634160,,"q!"
+:w
+|2,0,1774571429,,"w"
 :!
 |2,0,1773807536,,"!"
-:x
-|2,0,1773798976,,"x"
 
 # Search String History (newest to oldest):
+?/log_
+|2,1,1774810431,47,"log_"
+?/VITE_API_BASE
+|2,1,1774809198,47,"VITE_API_BASE"
+?/setYear
+|2,1,1774808605,47,"setYear"
+?/npm
+|2,1,1774635390,47,"npm"
+?/FINTRACK_EMAIL
+|2,1,1774398439,47,"FINTRACK_EMAIL"
+?/password
+|2,1,1774398089,47,"password"
+?/flu
+|2,1,1774391209,47,"flu"
 
 # Expression History (newest to oldest):
 
@@ -29,276 +50,375 @@
 # Debug Line History (newest to oldest):
 
 # Registers:
+"0	LINE	0
+	const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'
+|3,0,0,1,1,0,1774809203,"const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'"
+"1	LINE	0
+	
+|3,0,1,1,1,0,1774398275,""
+""-	CHAR	0
+	import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'
+|3,1,36,0,1,0,1774809212,"import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'"
 
 # File marks:
-'0  2  1  ~/.gitconfig
-|4,48,2,1,1773882625,"~/.gitconfig"
-'1  1  0  ~/fintrack/dev/Dockerfile
-|4,49,1,0,1773807544,"~/fintrack/dev/Dockerfile"
-'2  1  0  ~/.env.example
-|4,50,1,0,1773798976,"~/.env.example"
-'3  60  25  ~/fintrack/dev/docker-compose.yml
-|4,51,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
-'4  39  21  ~/fintrack/dev/requirements.txt
-|4,52,39,21,1773798809,"~/fintrack/dev/requirements.txt"
-'5  46  0  ~/fintrack/dev/Dockerfile
-|4,53,46,0,1773798778,"~/fintrack/dev/Dockerfile"
-'6  46  0  ~/fintrack/dev/Dockerfile
-|4,54,46,0,1773798778,"~/fintrack/dev/Dockerfile"
-'7  48  0  ~/fintrack/.gitignore
-|4,55,48,0,1773697429,"~/fintrack/.gitignore"
-'8  1  4  ~/,gitignore
-|4,56,1,4,1773623011,"~/,gitignore"
-'9  1  0  ~/.gitconfig
-|4,57,1,0,1773617006,"~/.gitconfig"
+'0  6  41  ~/fintrack/dev/.env
+|4,48,6,41,1774810536,"~/fintrack/dev/.env"
+'1  1  0  ~/fintrack/.env
+|4,49,1,0,1774810486,"~/fintrack/.env"
+'2  1  0  ~/fintrack/frontend/.env
+|4,50,1,0,1774810479,"~/fintrack/frontend/.env"
+'3  32  0  ~/fintrack/frontend/nginx.conf
+|4,51,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+'4  1  0  ~/fintrack/frontend/nginx.conf
+|4,52,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+'5  1  0  ~/fintrack/frontend/nginx.conf
+|4,53,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+'6  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,54,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+'7  11  18  ~/fintrack/frontend/src/api/client.js
+|4,55,11,18,1774808791,"~/fintrack/frontend/src/api/client.js"
+'8  36  39  ~/fintrack/frontend/src/App.jsx
+|4,56,36,39,1774808668,"~/fintrack/frontend/src/App.jsx"
+'9  1  0  ~/fintrack/frontend/App.jsx
+|4,57,1,0,1774808586,"~/fintrack/frontend/App.jsx"
 
 # Jumplist (newest first):
--'  2  1  ~/.gitconfig
-|4,39,2,1,1773882625,"~/.gitconfig"
--'  1  0  ~/.gitconfig
-|4,39,1,0,1773882606,"~/.gitconfig"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773807544,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773807544,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773807534,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773807534,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/.env.example
-|4,39,1,0,1773798976,"~/.env.example"
--'  1  0  ~/.env.example
-|4,39,1,0,1773798976,"~/.env.example"
--'  1  0  ~/.env.example
-|4,39,1,0,1773798976,"~/.env.example"
--'  1  0  ~/.env.example
-|4,39,1,0,1773798976,"~/.env.example"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  60  25  ~/fintrack/dev/docker-compose.yml
-|4,39,60,25,1773798850,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  1  0  ~/fintrack/dev/docker-compose.yml
-|4,39,1,0,1773798838,"~/fintrack/dev/docker-compose.yml"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  39  21  ~/fintrack/dev/requirements.txt
-|4,39,39,21,1773798809,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  1  0  ~/fintrack/dev/requirements.txt
-|4,39,1,0,1773798796,"~/fintrack/dev/requirements.txt"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  46  0  ~/fintrack/dev/Dockerfile
-|4,39,46,0,1773798778,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  1  0  ~/fintrack/dev/Dockerfile
-|4,39,1,0,1773798764,"~/fintrack/dev/Dockerfile"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
--'  48  0  ~/fintrack/.gitignore
-|4,39,48,0,1773697429,"~/fintrack/.gitignore"
+-'  6  41  ~/fintrack/dev/.env
+|4,39,6,41,1774810536,"~/fintrack/dev/.env"
+-'  21  0  ~/fintrack/dev/.env
+|4,39,21,0,1774810517,"~/fintrack/dev/.env"
+-'  1  0  ~/fintrack/.env
+|4,39,1,0,1774810486,"~/fintrack/.env"
+-'  1  0  ~/fintrack/.env
+|4,39,1,0,1774810486,"~/fintrack/.env"
+-'  1  0  ~/fintrack/frontend/.env
+|4,39,1,0,1774810479,"~/fintrack/frontend/.env"
+-'  1  0  ~/fintrack/frontend/.env
+|4,39,1,0,1774810479,"~/fintrack/frontend/.env"
+-'  1  0  ~/fintrack/frontend/.env
+|4,39,1,0,1774810479,"~/fintrack/frontend/.env"
+-'  1  0  ~/fintrack/frontend/.env
+|4,39,1,0,1774810479,"~/fintrack/frontend/.env"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  32  0  ~/fintrack/frontend/nginx.conf
+|4,39,32,0,1774810432,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810431,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  1  0  ~/fintrack/frontend/nginx.conf
+|4,39,1,0,1774810406,"~/fintrack/frontend/nginx.conf"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  14  18  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,14,18,1774809216,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  13  33  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,13,33,1774809200,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  1  0  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,1,0,1774809198,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  1  0  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,1,0,1774809198,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  1  0  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,1,0,1774809198,"~/fintrack/frontend/src/pages/Import.jsx"
+-'  1  0  ~/fintrack/frontend/src/pages/Import.jsx
+|4,39,1,0,1774809198,"~/fintrack/frontend/src/pages/Import.jsx"
 
 # History of marks within files (newest to oldest):
 
-> ~/.gitconfig
-	*	1773882612	0
-	"	2	1
+> ~/fintrack/dev/.env
+	*	1774810534	0
+	"	6	41
+	^	6	42
+	.	6	41
+	+	22	27
+	+	21	0
+	+	6	41
+
+> ~/fintrack/.env
+	*	1774810485	0
+	"	1	0
+
+> ~/fintrack/frontend/.env
+	*	1774810478	0
+	"	1	0
+
+> ~/fintrack/frontend/nginx.conf
+	*	1774810431	0
+	"	32	0
+	^	29	1
+	.	29	0
+	+	29	0
+
+> ~/fintrack/frontend/src/pages/Import.jsx
+	*	1774809214	0
+	"	14	18
+	^	14	19
+	.	14	18
+	+	14	0
+	+	13	1
+	+	14	18
+
+> ~/fintrack/frontend/src/api/client.js
+	*	1774808767	0
+	"	11	18
+	^	11	19
+	.	11	18
+	+	11	0
+	+	10	1
+	+	11	18
+
+> ~/fintrack/frontend/src/App.jsx
+	*	1774808665	0
+	"	36	39
+	^	36	40
+	.	36	39
+	+	36	0
+	+	35	1
+	+	36	39
+
+> ~/fintrack/frontend/App.jsx
+	*	1774808584	0
+	"	1	0
+
+> ~/fintrack/frontend/Dockerfile
+	*	1774635533	0
+	"	17	0
+	^	38	35
+	.	38	34
+	+	38	34
+
+> ~/fintrack/frontend/docker-compose.yml
+	*	1774635390	0
+	"	1	0
+	^	45	31
+	.	45	30
+	+	45	30
+
+> ~/fintrack/frontend/main.jsx
+	*	1774634158	0
+	"	1	0
+	^	1	0
+
+> ~/fintrack/frontend/index.css
+	*	1774571643	0
+	"	11	73
+	^	11	74
+	.	11	73
+	+	11	73
+
+> ~/fintrack/frontend/postcss.config.js
+	*	1774571598	0
+	"	6	0
+	^	6	1
+	.	6	0
+	+	6	0
+
+> ~/fintrack/tailwind.config.js
+	*	1774571563	0
+	"	20	0
+	^	20	1
+	.	20	0
+	+	20	0
+
+> ~/fintrack/frontend/vite.config.js
+	*	1774571528	0
+	"	16	1
+	^	16	2
+	.	16	1
+	+	16	1
+
+> ~/fintrack/frontend/package.json
+	*	1774571485	0
+	"	27	0
+	^	27	1
+	.	27	0
+	+	27	0
+
+> ~/sync_from_vms.sh
+	*	1774460262	0
+	"	2	18
+	^	2	19
+	.	2	18
+	+	2	18
+
+> ~/fintrack/dev/docker-compose.yml
+	*	1774400728	0
+	"	33	24
+	^	33	25
+	.	33	24
+	+	62	25
+	+	35	44
+	+	34	0
+	+	33	24
+
+> ~/fintrack/dev/notebooks/02_data_exploration.ipynb
+	*	1774398133	0
+	"	85	20
 
 > ~/fintrack/dev/Dockerfile
-	*	1773807540	0
-	"	1	0
+	*	1774391209	0
+	"	46	0
 	^	46	38
 	.	46	37
 	+	46	37
-
-> ~/.env.example
-	*	1773798888	0
-	"	1	0
-
-> ~/fintrack/dev/docker-compose.yml
-	*	1773798848	0
-	"	60	25
-	^	60	26
-	.	60	25
-	+	60	25
-
-> ~/fintrack/dev/requirements.txt
-	*	1773798807	0
-	"	39	21
-	^	39	22
-	.	39	21
-	+	39	21
-
-> ~/fintrack/.gitignore
-	*	1773697428	0
-	"	48	0
-	^	48	0
-	.	47	5
-	+	47	5
-
-> ~/,gitignore
-	*	1773623004	0
-	"	1	4
-	^	47	5
-	.	47	4
-	+	47	4
-
-> ~/.git/config
-	*	1773616959	0
-	"	1	0

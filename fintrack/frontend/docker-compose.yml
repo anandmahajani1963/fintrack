@@ -1,0 +1,45 @@
+# ============================================================
+# fintrack — Frontend (Dev VM)
+# File: frontend/docker-compose.yml
+# Version: 1.0 — 2026-03-26
+#
+# Usage:
+#   docker compose build          # build image
+#   docker compose up -d          # start
+#   docker compose down           # stop
+#   docker compose build --no-cache && docker compose up -d
+#
+# Access: http://192.168.1.171:3000
+# ============================================================
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintrack_frontend
+    restart: unless-stopped
+
+    environment:
+      # API base URL — used at build time via Vite env vars
+      VITE_API_BASE: http://192.168.1.170:8000
+
+    ports:
+      - "0.0.0.0:3000:3000"
+
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+networks:
+  default:
+    name: fintrack_frontend_net

@@ -83,7 +83,7 @@ def monthly_pivot(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
+            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
             t.category_name,
             COALESCE(t.subcategory, t.category_name) AS subcategory,
             SUM(t.amount)  AS total_amount,
@@ -217,7 +217,7 @@ def trend(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
+            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
             SUM(t.amount) AS total_amount,
             COUNT(*)      AS txn_count
         FROM transactions t
@@ -283,7 +283,7 @@ def essential_split(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
+            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
             t.category_name,
             COALESCE(t.subcategory, t.category_name) AS subcategory,
             SUM(t.amount) AS total_amount,
@@ -400,7 +400,7 @@ def utility_seasonal(
             SELECT
                 t.year_num,
                 t.month_num,
-                TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
+                TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
                 COALESCE(t.subcategory, 'Other Utility') AS utility_type,
                 SUM(t.amount) AS total_amount,
                 COUNT(*)      AS txn_count
