@@ -8,6 +8,8 @@
 #   v1.2  2026-03-22  Fixed: duplicate detection logic rewritten (no per-row
 #                     try/except rollback; uses pre-check query instead)
 #   v1.3  2026-03-23  Added subcategory to Transaction insert
+#   v1.4  2026-03-30  Password moved from query param to X-Fintrack-Password header
+#                     for accounts and list endpoints. Import keeps Form (POST body).
 #                     Fixed: subcategory was missing from constructor call
 #
 # Endpoints:
@@ -16,7 +18,7 @@
 #   GET  /api/v1/transactions/accounts  list card accounts (decrypted)
 # ============================================================
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, Header, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
@@ -189,8 +191,9 @@ def import_csv(
 @router.get("/accounts")
 def list_accounts(
     current_user: CurrentUser,
-    password: str = Query(..., description="Your fintrack password"),
     db: Session = Depends(get_db),
+    password: str = Header(..., alias="x-fintrack-password",
+                           description="Your fintrack password for key derivation"),
 ):
     enc_key  = _get_user_key(current_user.id, password, db)
     accounts = db.query(Account).filter(
@@ -214,7 +217,7 @@ def list_accounts(
 @router.get("")
 def list_transactions(
     current_user: CurrentUser,
-    password:  str           = Query(...),
+    password:  str           = Header(..., alias="x-fintrack-password"),
     year:      Optional[int] = Query(None),
     month:     Optional[int] = Query(None),
     category:  Optional[str] = Query(None),
@@ -260,4 +263,111 @@ def list_transactions(
             }
             for t in rows
         ],
+    }
+
+
+
+# ── List all categories (for dropdowns) ───────────────────────────────────────
+
+@router.get("/categories")
+def list_categories(
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """
+    Return all categories defined for this user regardless of whether
+    they have any transactions. Used for dropdowns in the UI.
+    Version: 1.0 — 2026-04-01
+    """
+    cats = db.query(Category).filter(
+        Category.user_id == current_user.id
+    ).order_by(Category.sort_order, Category.name).all()
+    return [
+        {
+            "name":        c.name,
+            "subcategory": c.subcategory or c.name,
+            "is_essential":c.is_essential,
+            "color_code":  c.color_code,
+        }
+        for c in cats
+    ]
+
+
+
+
+# ── List all categories (for dropdowns) ───────────────────────────────────────
+
+@router.get("/categories")
+def list_categories(
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """
+    Return all categories defined for the user — regardless of whether
+    they have any transactions. Used by the Reconciliation dropdown so
+    new categories (e.g. Travel/International) appear immediately.
+    """
+    cats = db.query(Category).filter(
+        Category.user_id == current_user.id
+    ).order_by(Category.sort_order, Category.name).all()
+    return [
+        {
+            "name":        c.name,
+            "subcategory": c.subcategory or c.name,
+            "is_essential":c.is_essential,
+            "color_code":  c.color_code,
+        }
+        for c in cats
+    ]
+
+# ── Category update endpoint ───────────────────────────────────────────────────
+
+from pydantic import BaseModel as PydanticBase
+
+class CategoryUpdate(PydanticBase):
+    category_name: str
+    subcategory:   str
+
+@router.patch("/{transaction_id}/category", status_code=200)
+def update_transaction_category(
+    transaction_id: str,
+    body: CategoryUpdate,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """
+    Update the category and subcategory of a single transaction.
+    Used by the Reconciliation page inline editor.
+    Only the transaction owner can update their own transactions.
+    """
+    from sqlalchemy import text as sql_text
+    import uuid
+
+    # Verify transaction belongs to this user
+    txn = db.query(Transaction).filter(
+        Transaction.id      == uuid.UUID(transaction_id),
+        Transaction.user_id == current_user.id,
+    ).first()
+
+    if not txn:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    # Look up is_essential from categories table
+    cat = db.query(Category).filter(
+        Category.user_id    == current_user.id,
+        Category.name       == body.category_name,
+        Category.subcategory == body.subcategory,
+    ).first()
+
+    txn.category_name = body.category_name
+    txn.subcategory   = body.subcategory
+    txn.is_essential  = cat.is_essential if cat else False
+
+    db.commit()
+
+    return {
+        "id":           str(txn.id),
+        "category_name":txn.category_name,
+        "subcategory":  txn.subcategory,
+        "is_essential": txn.is_essential,
     }

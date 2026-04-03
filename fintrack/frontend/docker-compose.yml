@@ -1,15 +1,10 @@
 # ============================================================
-# fintrack — Frontend (Dev VM)
+# fintrack — Frontend Docker Compose (Dev VM)
 # File: frontend/docker-compose.yml
-# Version: 1.0 — 2026-03-26
-#
-# Usage:
-#   docker compose build          # build image
-#   docker compose up -d          # start
-#   docker compose down           # stop
-#   docker compose build --no-cache && docker compose up -d
-#
-# Access: http://192.168.1.171:3000
+# Version: 1.2 — 2026-04-02
+# Changes:
+#   v1.2  2026-04-02  nginx now listens on 80 internally
+#                     healthcheck updated to port 80
 # ============================================================
 
 services:
@@ -21,18 +16,17 @@ services:
     restart: unless-stopped
 
     environment:
-      # API base URL — used at build time via Vite env vars
       VITE_API_BASE: http://192.168.1.170:8000
 
     ports:
-      - "0.0.0.0:3000:3000"
+      - "0.0.0.0:3000:80"
 
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
 
     logging:
       driver: "json-file"

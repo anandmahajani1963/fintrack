@@ -1,13 +1,17 @@
 // ============================================================
 // fintrack — App root component
 // File: src/App.jsx
-// Version: 1.1 — 2026-03-27
-// Changes: Added Import, Members, Reconciliation pages
+// Version: 1.2 — 2026-03-31
+// Changes:
+//   v1.0  2026-03-26  Initial implementation
+//   v1.1  2026-03-27  Added Import, Members, Reconciliation pages
+//   v1.2  2026-03-31  Added PasswordPrompt for post-refresh session restore
 // ============================================================
 
 import React, { useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Login          from './pages/Login'
+import PasswordPrompt from './components/PasswordPrompt'
 import Sidebar        from './components/Sidebar'
 import Dashboard      from './pages/Dashboard'
 import Categories     from './pages/Categories'
@@ -30,12 +34,15 @@ const PAGES = {
 }
 
 function AppInner() {
-  const { isLoggedIn }  = useAuth()
+  const { isLoggedIn, needsPassword } = useAuth()
   const [page, setPage] = useState('dashboard')
-//  const [year, setYear] = useState(new Date().getFullYear())
   const [year, setYear] = useState(2025)
 
+  // Not logged in → show login page
   if (!isLoggedIn) return <Login />
+
+  // Session restored but password needed → show password prompt
+  if (needsPassword) return <PasswordPrompt />
 
   const PageComponent = PAGES[page] || Dashboard
 

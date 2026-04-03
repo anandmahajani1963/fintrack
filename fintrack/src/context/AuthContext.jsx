@@ -1,12 +1,13 @@
 // ============================================================
 // fintrack — Auth context
 // File: src/context/AuthContext.jsx
-// Version: 1.2 — 2026-03-31
+// Version: 1.1 — 2026-03-30
 // Changes:
 //   v1.0  2026-03-26  Initial implementation
-//   v1.1  2026-03-30  Session restore on page refresh
-//   v1.2  2026-03-31  Handle "session restored but no password" state
-//                     Pages show password prompt instead of spinning forever
+//   v1.1  2026-03-30  Added session restore on page refresh using
+//                     refresh token stored in sessionStorage.
+//                     Tab close = session ends (most secure).
+//                     Password kept in memory only — never persisted.
 // ============================================================
 
 import React, {
@@ -18,17 +19,19 @@ import { auth } from '../api/client'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]           = useState(null)
-  const [password, setPassword]   = useState('')
-  const [restoring, setRestoring] = useState(true)
-  // True when session was restored but password not available
-  const [needsPassword, setNeedsPassword] = useState(false)
+  const [user, setUser]         = useState(null)
+  const [password, setPassword] = useState('')
+  const [restoring, setRestoring] = useState(true)  // true while checking session
 
+  // On mount — silently try to restore session from refresh token
+  // This fixes the "refresh = back to login" problem
   useEffect(() => {
     auth.tryRestoreSession().then(restored => {
       if (restored) {
         setUser({ email: auth.email() })
-        setNeedsPassword(true)  // session ok, but password needs re-entry
+        // Note: password cannot be restored from sessionStorage (never stored)
+        // User will be logged in but password-requiring features will prompt
+        // them to re-enter password on first use — acceptable security tradeoff
       }
       setRestoring(false)
     })
@@ -38,22 +41,16 @@ export function AuthProvider({ children }) {
     const data = await auth.login(email, pwd)
     setUser({ id: data.user_id, email: data.email })
     setPassword(pwd)
-    setNeedsPassword(false)
     return data
-  }, [])
-
-  const supplyPassword = useCallback((pwd) => {
-    setPassword(pwd)
-    setNeedsPassword(false)
   }, [])
 
   const logout = useCallback(() => {
     auth.logout()
     setUser(null)
     setPassword('')
-    setNeedsPassword(false)
   }, [])
 
+  // While checking sessionStorage, show nothing (avoids login flash)
   if (restoring) {
     return (
       <div className="min-h-screen flex items-center justify-center
@@ -65,11 +62,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{
-      user, password, login, logout,
-      isLoggedIn: !!user,
-      needsPassword, supplyPassword
-    }}>
+    <AuthContext.Provider value={{ user, password, login, logout, isLoggedIn: !!user }}>
       {children}
     </AuthContext.Provider>
   )

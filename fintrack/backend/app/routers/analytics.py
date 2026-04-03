@@ -24,7 +24,7 @@
 #   GET /api/v1/analytics/utility-seasonal   seasonal utility breakdown
 # ============================================================
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, Header, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
@@ -83,7 +83,7 @@ def monthly_pivot(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
+            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
             t.category_name,
             COALESCE(t.subcategory, t.category_name) AS subcategory,
             SUM(t.amount)  AS total_amount,
@@ -91,7 +91,7 @@ def monthly_pivot(
         FROM transactions t
         WHERE t.user_id = :uid
         {year_filter}
-        GROUP BY t.year_num, t.month_num, 
+        GROUP BY t.year_num, t.month_num, t.txn_date,
                  t.category_name, t.subcategory
         ORDER BY t.year_num, t.month_num, t.category_name
     """), params).fetchall()
@@ -217,13 +217,13 @@ def trend(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
+            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
             SUM(t.amount) AS total_amount,
             COUNT(*)      AS txn_count
         FROM transactions t
         WHERE t.user_id = :uid
         {' '.join(filters)}
-        GROUP BY t.year_num, t.month_num
+        GROUP BY t.year_num, t.month_num, t.txn_date
         ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
@@ -283,7 +283,7 @@ def essential_split(
         SELECT
             t.year_num,
             t.month_num,
-            TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
+            TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
             t.category_name,
             COALESCE(t.subcategory, t.category_name) AS subcategory,
             SUM(t.amount) AS total_amount,
@@ -291,7 +291,7 @@ def essential_split(
         FROM transactions t
         WHERE t.user_id = :uid
         {' '.join(filters)}
-        GROUP BY t.year_num, t.month_num, t.category_name, t.subcategory
+        GROUP BY t.year_num, t.month_num, t.txn_date, t.category_name, t.subcategory
         ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
@@ -325,15 +325,16 @@ def essential_split(
 @router.get("/large-expenses")
 def large_expenses(
     current_user: CurrentUser,
-    password:  str            = Query(..., description="Your fintrack password"),
     year:      Optional[int]  = Query(None),
     threshold: Optional[float]= Query(None, description="Minimum amount — default $200"),
+    password:  str            = Header(..., alias="x-fintrack-password",
+                                       description="Your fintrack password for key derivation"),
     db: Session = Depends(get_db),
 ):
     """
     Large expenses with decrypted descriptions, sorted by amount descending.
-    Password is required only to decrypt merchant names — sent as query param
-    over HTTPS (acceptable for Phase 1; will move to header in Phase 2).
+    Password is required only to decrypt merchant names.
+    Sent as X-Fintrack-Password header — never appears in URLs or logs.
     """
     enc_key   = _get_enc_key(current_user.id, password, db)
     min_amount = threshold if threshold is not None else 200.0
@@ -400,7 +401,7 @@ def utility_seasonal(
             SELECT
                 t.year_num,
                 t.month_num,
-                TO_CHAR(TO_DATE(t.year_num::text || '-' || LPAD(t.month_num::text,2,'0') || '-01', 'YYYY-MM-DD'), 'Mon YYYY') AS month_label,
+                TO_CHAR(DATE_TRUNC('month', t.txn_date), 'Mon YYYY') AS month_label,
                 COALESCE(t.subcategory, 'Other Utility') AS utility_type,
                 SUM(t.amount) AS total_amount,
                 COUNT(*)      AS txn_count
@@ -408,7 +409,7 @@ def utility_seasonal(
             WHERE t.user_id = :uid
               AND t.category_name = 'Utilities'
               {year_filter}
-            GROUP BY t.year_num, t.month_num, t.subcategory
+            GROUP BY t.year_num, t.month_num, t.txn_date, t.subcategory
         ),
         ua AS (
             SELECT year_num, utility_type, AVG(total_amount) AS yearly_avg
@@ -458,4 +459,80 @@ def utility_seasonal(
         "total_utility_spend": round(
             sum(m["amount"] for ut in result for m in ut["months"]), 2
         ),
+    }
+
+
+# ── 7. Member Summary ─────────────────────────────────────────────────────────
+
+@router.get("/members")
+def member_summary(
+    current_user: CurrentUser,
+    year: Optional[int] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """
+    Spend by member (cardholder) and category.
+    Member is derived from the account's member_name field.
+    Descriptions are not decrypted — only aggregates returned.
+    """
+    params = {"uid": str(current_user.id)}
+    year_filter = "AND t.year_num = :year" if year else ""
+    if year:
+        params["year"] = year
+
+    rows = db.execute(text(f"""
+        SELECT
+            a.member_name                                    AS member_enc,
+            a.provider,
+            t.category_name,
+            COALESCE(t.subcategory, t.category_name)        AS subcategory,
+            SUM(t.amount)                                    AS total_amount,
+            COUNT(*)                                         AS txn_count
+        FROM transactions t
+        JOIN accounts a ON a.id = t.account_id
+        WHERE t.user_id = :uid
+        {year_filter}
+        GROUP BY a.member_name, a.provider, t.category_name, t.subcategory
+        ORDER BY a.member_name, total_amount DESC
+    """), params).fetchall()
+
+    cat_meta = _get_cat_meta(current_user.id, db)
+
+    # Group by member (member_name is encrypted — use as opaque key)
+    members = {}
+    for row in rows:
+        key = str(row.member_enc)   # encrypted blob as key — never decrypted here
+        if key not in members:
+            members[key] = {
+                "provider":   row.provider,
+                "categories": [],
+                "total":      0,
+            }
+        meta = cat_meta.get((row.category_name, row.subcategory),
+                            {"is_essential": False, "color_code": "#9E9E9E"})
+        amount = round(float(row.total_amount), 2)
+        members[key]["categories"].append({
+            "category":    row.category_name,
+            "subcategory": row.subcategory,
+            "is_essential":meta["is_essential"],
+            "color_code":  meta["color_code"],
+            "total":       amount,
+            "txn_count":   row.txn_count,
+        })
+        members[key]["total"] = round(members[key]["total"] + amount, 2)
+
+    # Return as list — member key is index (no decryption needed)
+    result = []
+    for i, (key, data) in enumerate(members.items()):
+        result.append({
+            "member_index": i + 1,
+            "provider":     data["provider"],
+            "total":        data["total"],
+            "categories":   data["categories"],
+        })
+
+    return {
+        "year":    year,
+        "members": result,
+        "total":   round(sum(m["total"] for m in result), 2),
     }

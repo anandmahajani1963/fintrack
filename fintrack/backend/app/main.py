@@ -1,6 +1,12 @@
 # ============================================================
 # fintrack — FastAPI application entry point
-# File: /home/fintrack/fintrack/backend/app/main.py
+# File: backend/app/main.py
+# Version: 1.2 — 2026-03-30
+# Changes:
+#   v1.0  2026-03-17  Initial implementation
+#   v1.1  2026-03-22  Added analytics and transactions routers
+#   v1.2  2026-03-30  Added X-Fintrack-Password to CORS allowed headers
+#                     so browser can send password as header not query param
 # ============================================================
 
 from fastapi import FastAPI
@@ -12,7 +18,6 @@ import json
 from app.config import settings
 from app.database import engine, check_db_connection
 
-# Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
@@ -23,62 +28,53 @@ logger = logging.getLogger("fintrack")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup and shutdown events."""
-    # Startup
     logger.info("fintrack API starting up...")
     if check_db_connection():
         logger.info("Database connection: OK")
     else:
-        logger.error("Database connection: FAILED — check DB_HOST and credentials")
+        logger.error("Database connection: FAILED")
     yield
-    # Shutdown
     logger.info("fintrack API shutting down...")
 
 
 app = FastAPI(
     title="fintrack API",
     description="Personal finance tracking — zero-knowledge architecture",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
-    # Disable docs in production
     docs_url="/docs" if settings.API_ENV == "development" else None,
     redoc_url="/redoc" if settings.API_ENV == "development" else None,
 )
 
-# CORS middleware — restrict to configured origins
-cors_origins = json.loads(settings.CORS_ORIGINS) if isinstance(settings.CORS_ORIGINS, str) else settings.CORS_ORIGINS
+cors_origins = json.loads(settings.CORS_ORIGINS) if isinstance(settings.CORS_ORIGINS, str) \
+               else settings.CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "X-Fintrack-Password",   # custom header for key derivation password
+    ],
+    expose_headers=["X-Fintrack-Password"],
 )
 
-
-# ── Routers ───────────────────────────────────────────────────────────────────
 from app.routers import auth, transactions, analytics
 app.include_router(auth.router,         prefix="/api/v1/auth",         tags=["auth"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
-# Coming next:
-# from app.routers import accounts, analytics, insights
 app.include_router(analytics.router,    prefix="/api/v1/analytics",    tags=["analytics"])
 
 
-# ── Core endpoints ─────────────────────────────────────────────────────────────
-
 @app.get("/health", tags=["system"])
 async def health_check():
-    """
-    Health check endpoint — used by Docker healthcheck and load balancers.
-    Returns database connectivity status.
-    """
-    db_ok = check_db_connection()
+    db_ok  = check_db_connection()
     status = "healthy" if db_ok else "degraded"
     return {
         "status":   status,
-        "version":  "0.1.0",
+        "version":  "0.2.0",
         "database": "connected" if db_ok else "unreachable",
         "env":      settings.API_ENV,
     }
@@ -88,6 +84,6 @@ async def health_check():
 async def root():
     return {
         "app":     "fintrack",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "docs":    "/docs" if settings.API_ENV == "development" else "disabled",
     }

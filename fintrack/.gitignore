@@ -59,3 +59,5 @@ test_output/
 .viminfo
 
 .git-credentials
+
+.bash_history

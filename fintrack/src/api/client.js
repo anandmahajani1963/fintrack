@@ -6,8 +6,6 @@
 //   v1.0  2026-03-26  Initial implementation
 //   v1.1  2026-03-27  Fixed CORS — use relative paths through nginx proxy
 //   v1.2  2026-03-30  Password moved to X-Fintrack-Password header
-//   v1.3  2026-03-31  Added members analytics endpoint
-//                     Added transaction category update endpoint
 //                     Eliminated password from all URLs and query strings
 // ============================================================
 
@@ -147,9 +145,6 @@ export const analytics = {
 
   utilitySeasonal: (year) =>
     apiFetch(`/api/v1/analytics/utility-seasonal${year ? `?year=${year}` : ''}`),
-
-  members: (year) =>
-    apiFetch(`/api/v1/analytics/members${year ? `?year=${year}` : ''}`),
 }
 
 // ── Transaction endpoints ──────────────────────────────────────────────────
@@ -163,19 +158,4 @@ export const transactions = {
 
   accounts: (password) =>
     apiFetch('/api/v1/transactions/accounts', {}, password),
-
-  // All defined categories regardless of spend — for dropdowns
-  categories: () =>
-    apiFetch('/api/v1/transactions/categories'),
-
-  // All defined categories regardless of spend — for dropdowns
-  categories: () =>
-    apiFetch('/api/v1/transactions/categories'),
-
-  // Update category of a single transaction (used by Reconciliation page)
-  updateCategory: (transactionId, categoryName, subcategory) =>
-    apiFetch(`/api/v1/transactions/${transactionId}/category`, {
-      method: 'PATCH',
-      body: JSON.stringify({ category_name: categoryName, subcategory }),
-    }),
 }

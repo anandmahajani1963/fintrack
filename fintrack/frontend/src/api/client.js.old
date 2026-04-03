@@ -1,17 +1,14 @@
 // ============================================================
 // fintrack — API client
 // File: src/api/client.js
-// Version: 1.2 — 2026-03-30
-// Changes:
-//   v1.0  2026-03-26  Initial implementation
-//   v1.1  2026-03-27  Fixed CORS — use relative paths through nginx proxy
-//   v1.2  2026-03-30  Password moved to X-Fintrack-Password header
-//   v1.3  2026-03-31  Added members analytics endpoint
-//                     Added transaction category update endpoint
-//                     Eliminated password from all URLs and query strings
+// Version: 1.0 — 2026-03-26
+//
+// All API calls go through this module.
+// Token is stored in memory (not localStorage) for security.
 // ============================================================
 
-const API_BASE = ''  // empty = relative path through nginx proxy
+//const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'
+const API_BASE = ''
 
 // In-memory token storage — never touches localStorage
 let _token = null
@@ -31,33 +28,9 @@ export const auth = {
     const data = await r.json()
     _token = data.access_token
     _email = data.email
+    // Store refresh token for session recovery
     sessionStorage.setItem('refresh_token', data.refresh_token)
     return data
-  },
-
-  async tryRestoreSession() {
-    // Called on app startup — silently restore session from refresh token
-    const refreshToken = sessionStorage.getItem('refresh_token')
-    if (!refreshToken) return false
-    try {
-      const r = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ refresh_token: refreshToken }),
-      })
-      if (!r.ok) {
-        sessionStorage.removeItem('refresh_token')
-        return false
-      }
-      const data = await r.json()
-      _token = data.access_token
-      _email = data.email
-      sessionStorage.setItem('refresh_token', data.refresh_token)
-      return true
-    } catch {
-      sessionStorage.removeItem('refresh_token')
-      return false
-    }
   },
 
   async refresh() {
@@ -83,24 +56,16 @@ export const auth = {
 }
 
 // Core fetch with auto-refresh on 401
-// password param → X-Fintrack-Password header (never in URL)
-async function apiFetch(path, options = {}, password = null) {
+async function apiFetch(path, options = {}) {
   if (!_token) throw new Error('Not authenticated')
-
-  const headers = {
-    'Content-Type':         'application/json',
-    'Authorization':        `Bearer ${_token}`,
-    ...options.headers,
-  }
-
-  // Add password as header if provided — never as query param
-  if (password) {
-    headers['X-Fintrack-Password'] = password
-  }
 
   const doFetch = (token) => fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: { ...headers, 'Authorization': `Bearer ${token}` },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers,
+    },
   })
 
   let r = await doFetch(_token)
@@ -138,44 +103,24 @@ export const analytics = {
   essentialSplit: (year) =>
     apiFetch(`/api/v1/analytics/essential-split${year ? `?year=${year}` : ''}`),
 
-  // Password sent as X-Fintrack-Password header — not in URL
   largeExpenses: (password, year, threshold = 200) => {
-    const params = new URLSearchParams({ threshold })
+    const params = new URLSearchParams({ password, threshold })
     if (year) params.set('year', year)
-    return apiFetch(`/api/v1/analytics/large-expenses?${params}`, {}, password)
+    return apiFetch(`/api/v1/analytics/large-expenses?${params}`)
   },
 
   utilitySeasonal: (year) =>
     apiFetch(`/api/v1/analytics/utility-seasonal${year ? `?year=${year}` : ''}`),
-
-  members: (year) =>
-    apiFetch(`/api/v1/analytics/members${year ? `?year=${year}` : ''}`),
 }
 
 // ── Transaction endpoints ──────────────────────────────────────────────────
 
 export const transactions = {
-  // Password sent as X-Fintrack-Password header — not in URL
   list: (password, params = {}) => {
-    const p = new URLSearchParams({ page_size: 50, ...params })
-    return apiFetch(`/api/v1/transactions?${p}`, {}, password)
+    const p = new URLSearchParams({ password, page_size: 50, ...params })
+    return apiFetch(`/api/v1/transactions?${p}`)
   },
 
   accounts: (password) =>
-    apiFetch('/api/v1/transactions/accounts', {}, password),
-
-  // All defined categories regardless of spend — for dropdowns
-  categories: () =>
-    apiFetch('/api/v1/transactions/categories'),
-
-  // All defined categories regardless of spend — for dropdowns
-  categories: () =>
-    apiFetch('/api/v1/transactions/categories'),
-
-  // Update category of a single transaction (used by Reconciliation page)
-  updateCategory: (transactionId, categoryName, subcategory) =>
-    apiFetch(`/api/v1/transactions/${transactionId}/category`, {
-      method: 'PATCH',
-      body: JSON.stringify({ category_name: categoryName, subcategory }),
-    }),
+    apiFetch(`/api/v1/transactions/accounts?password=${password}`),
 }
