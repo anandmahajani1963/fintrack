@@ -61,3 +61,6 @@ test_output/
 .git-credentials
 
 .bash_history
+
+.cache/*
+.mozilla/*
