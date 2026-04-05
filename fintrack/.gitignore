@@ -59,8 +59,9 @@ test_output/
 .viminfo
 
 .git-credentials
+/home/fintrack/.git-credentials
 
 .bash_history
 
-.cache/*
-.mozilla/*
+../.cache/*
+../.mozilla/*
