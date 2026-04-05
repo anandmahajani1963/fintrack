@@ -371,3 +371,54 @@ def update_transaction_category(
         "subcategory":  txn.subcategory,
         "is_essential": txn.is_essential,
     }
+
+
+# ── Create new category ────────────────────────────────────────────────────────
+
+class NewCategory(PydanticBase):
+    name:         str
+    subcategory:  str = ""
+    is_essential: bool = False
+    color_code:   str = "#6b7280"
+
+@router.post("/categories", status_code=201)
+def create_category(
+    body: NewCategory,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """Create a new category for the current user."""
+    subcat = body.subcategory.strip() or body.name.strip()
+
+    # Check for duplicate
+    existing = db.query(Category).filter(
+        Category.user_id    == current_user.id,
+        Category.name       == body.name.strip(),
+        Category.subcategory == subcat,
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Category '{body.name} / {subcat}' already exists"
+        )
+
+    cat = Category(
+        user_id      = current_user.id,
+        name         = body.name.strip(),
+        subcategory  = subcat,
+        is_essential = body.is_essential,
+        color_code   = body.color_code,
+        keywords     = [],
+        sort_order   = 99,
+    )
+    db.add(cat)
+    db.commit()
+    db.refresh(cat)
+
+    return {
+        "id":          str(cat.id),
+        "name":        cat.name,
+        "subcategory": cat.subcategory,
+        "is_essential":cat.is_essential,
+        "color_code":  cat.color_code,
+    }

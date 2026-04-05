@@ -168,9 +168,23 @@ export const transactions = {
   categories: () =>
     apiFetch('/api/v1/transactions/categories'),
 
+  // Create a new category
+  createCategory: (data) =>
+    apiFetch('/api/v1/transactions/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   // All defined categories regardless of spend — for dropdowns
   categories: () =>
     apiFetch('/api/v1/transactions/categories'),
+
+  // Create a new category
+  createCategory: (data) =>
+    apiFetch('/api/v1/transactions/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 
   // Update category of a single transaction (used by Reconciliation page)
   updateCategory: (transactionId, categoryName, subcategory) =>

@@ -57,9 +57,9 @@ export default function Dashboard({ year }) {
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={months} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
             <defs>
-              <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#2563eb" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#2563eb" stopOpacity={0.02} />
+              <linearGradient id="ftSpendGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#2563eb" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(156,163,175,0.25)" />
@@ -67,7 +67,8 @@ export default function Dashboard({ year }) {
             <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} width={48} />
             <Tooltip formatter={v => [fmtDec(v), "Spend"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
             <Area type="monotone" dataKey="total" stroke="#2563eb" strokeWidth={2.5}
-                  fill="url(#spendGradient)" dot={{ r: 4, fill: "#2563eb", strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                  fill="#2563eb" fillOpacity={0.15}
+                  dot={{ r: 4, fill: "#2563eb", strokeWidth: 0 }} activeDot={{ r: 6 }} />
           </AreaChart>
         </ResponsiveContainer>
       </Card>

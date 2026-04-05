@@ -470,3 +470,129 @@ ll -a
 sudo cat 04_api_validation-checkpoint.ipynb
 grep -nrw trend_data 
 sudo grep -nrw trend_data 
+su -
+cd
+ll -lrt
+cat sync.log 
+ip a
+docker compose ps
+cd dev
+cd fintrack/dev
+ll
+docker compose ps
+cd
+./sync_from_vms.sh 
+cd fintrack/
+git add .
+ll dev/notebooks
+lhrt dev/notebooks
+ll -a dev/notebooks
+su -
+pwd
+gid add .
+git add .
+git commit -m "Analytics fixes: remove txn_date from GROUP BY, add notebooks 02-05"
+git push origin main
+pwd
+mkdir frontend
+vi frontend/Dockerfile
+vi frontend/nginx.conf
+vi frontend/docker-compose.yml
+vi frontend/package.json
+vi frontend/vite.config.js
+vi tailwind.config.js
+vi frontend/postcss.config.js
+mv tailwind.config.js frontend/
+vi frontend/index.css
+vi frontend/main.jsx
+pwd
+cp /software/fintrack/*.tar.gz .
+ll
+tar -xzf fintrack_frontend.tar.gz
+find frontend -type f |soft
+find frontend -type f |sort
+find frontend -type f |sort|wc -l
+vi frontend/src/App.jsx
+cd frontend/
+docker compose build
+ ll
+cd ..
+tree frontend
+tree frontend|sort
+tree frontend/
+man tree
+tree -R frontend/
+tree --help
+tree -h frontend/
+tree --sort name frontend/
+tree frontend/ --sort name
+tree --sort frontend/
+tree frontend/ --sort
+tree frontend/ --sort name
+
+tree frontend/ --sort=name
+cd frontend/
+docker compose build
+ll -lrt
+sudo dnf install npm
+docker compose build
+vi docker-compose.yml 
+vi Dockerfile 
+sudo dnf install nodejs jq
+sudo npm install -q npm@latest
+docker compose build
+docker compose up -d
+docker compose ps
+cd ..
+docker compose down
+cd -
+docker compose down
+cd ..
+cp /software/fintrack/fintrack_frontend_v1.1.tar.gz .
+tar -xzf fintrack_frontend_v1.1.tar.gz
+ls frontend/src/pages/
+cd -
+docker compose build --no-cache
+cp ../dev/rebuild.sh .
+cat rebuild.sh 
+docker compose vm
+docker compose ps
+docker compose up -d
+docker compose ps
+vi App.jsx
+vi src/App.jsx
+head -5 ~/fintrack/frontend/src/api/client.js
+vi ~/fintrack/frontend/src/api/client.js
+./rebuild.sh 
+sed -i "s|const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'|const API_BASE = ''|"     ~/fintrack/frontend/src/pages/Import.jsx
+vi ~/fintrack/frontend/src/pages/Import.jsx
+./rebuild.sh 
+docker compose logs -f
+vi nginx.conf 
+cp nginx.conf nginx.conf.old
+cat >> ~/fintrack/frontend/nginx.conf << 'EOF'
+
+# Custom log format that redacts password parameter
+log_format redacted '$remote_addr - $remote_user [$time_local] '
+                    '"$request_method $uri $server_protocol" '
+                    '$status $body_bytes_sent "$http_referer"';
+access_log /var/log/nginx/access.log redacted;
+EOF
+
+vi nginx.conf 
+vi .env
+vi ../.env
+ll -a
+ll -a ..
+cd ../dev
+vi .env
+./rebuild.sh 
+cd ../frontend/
+./rebuild.sh 
+pwd
+cd
+./sync_from_vms.sh 
+git add .
+git commit -m "Frontend v1.1 - all 8 pages working, CORS fixed, GROUP BY fixed"
+git push origin main
+su -

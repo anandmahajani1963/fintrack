@@ -3,5 +3,5 @@
 # ibus session bus with the below address.
 # If the IBUS_ADDRESS environment variable is set, it will
 # be used rather than this file.
-IBUS_ADDRESS=unix:abstract=/home/fintrack/.cache/ibus/dbus-Ruipnarv,guid=171535dea1c55637b5ba2ae969bdee48
-IBUS_DAEMON_PID=55685
+IBUS_ADDRESS=unix:abstract=/home/fintrack/.cache/ibus/dbus-wSipK3AY,guid=03ea2a8dca396a2b343a82ff69ca9c61
+IBUS_DAEMON_PID=4040

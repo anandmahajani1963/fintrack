@@ -1,60 +1,54 @@
-// ============================================================
-// fintrack — Reconciliation page
-// File: src/pages/Reconciliation.jsx
-// Version: 1.2 — 2026-04-02
-// Changes:
-//   v1.0  2026-03-27  Initial implementation
-//   v1.1  2026-03-31  Added inline category editor
-//   v1.2  2026-04-02  Dropdown now loads from /transactions/categories
-//                     so ALL defined categories appear (not just ones
-//                     with existing transactions) — fixes Travel/International
-//   v1.2  2026-04-01  Dropdown now uses /transactions/categories endpoint
-//                     so all defined categories show (incl. Travel/International)
-//                     even if they have no transactions yet for Other transactions
-//                     Single combined dropdown (Category / Subcategory)
-//                     Batch save with one Save Changes button
-// ============================================================
-
 import React, { useEffect, useState, useCallback } from 'react'
-import { useAuth }    from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import { analytics, transactions } from '../api/client'
 import { Card, Loading, ErrorMsg, SectionTitle, Badge, fmtDec } from '../components/ui'
-import { AlertCircle, CheckCircle, Save, RotateCcw } from 'lucide-react'
+import { AlertCircle, CheckCircle, Save, RotateCcw, Plus, X } from 'lucide-react'
+
+const ESSENTIAL_OPTIONS = [
+  { value: true,  label: 'Essential' },
+  { value: false, label: 'Discretionary' },
+]
+
+const COLOR_OPTIONS = [
+  '#2563eb','#16a34a','#ea580c','#7c3aed','#dc2626',
+  '#0891b2','#d97706','#059669','#db2777','#6b7280',
+]
 
 export default function Reconciliation({ year }) {
   const { password }        = useAuth()
   const [catData, setCat]   = useState(null)
   const [others, setOthers] = useState(null)
-  const [allCats, setAllCats] = useState([])  // all category options for dropdown
-  const [pending, setPending] = useState({})  // {txnId: {category_name, subcategory}}
+  const [allCats, setAllCats] = useState([])
+  const [pending, setPending] = useState({})
   const [saving, setSaving]   = useState(false)
   const [saveResult, setSaveResult] = useState(null)
   const [error, setError]     = useState('')
 
+  // Add category form state
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newCat, setNewCat] = useState({
+    name: '', subcategory: '', is_essential: false, color_code: '#6b7280'
+  })
+  const [addError, setAddError]   = useState('')
+  const [addSaving, setAddSaving] = useState(false)
+  const [addSuccess, setAddSuccess] = useState('')
+
   const load = useCallback(() => {
     if (!password) return
-    setCat(null); setOthers(null); setError(''); setPending({}); setSaveResult(null)
+    setCat(null); setOthers(null); setError('')
+    setPending({}); setSaveResult(null)
 
     analytics.categorySummary(year)
-      .then(setCat)
-      .catch(e => setError(e.message))
+      .then(setCat).catch(e => setError(e.message))
 
     transactions.list(password, { year, category: 'Other', page_size: 200 })
-      .then(d => setOthers(d.items))
-      .catch(e => setError(e.message))
-
-    // Load all categories for the dropdown
-    fetch('/api/v1/analytics/category-summary', {
-      headers: { 'Authorization': `Bearer ${sessionStorage.getItem('_token') || ''}` }
-    })
-    // We already have catData for this — build from it after load
+      .then(d => setOthers(d.items)).catch(e => setError(e.message))
   }, [password, year])
 
   useEffect(() => { load() }, [load])
 
-  // Load ALL defined categories for the dropdown — includes ones with no
-  // transactions yet (e.g. Travel/International after migration)
-  useEffect(() => {
+  // Load ALL categories for dropdown — sorted alphabetically
+  const loadCats = useCallback(() => {
     transactions.categories()
       .then(cats => {
         const opts = cats
@@ -67,12 +61,15 @@ export default function Reconciliation({ year }) {
             category: c.name,
             subcategory: c.subcategory,
           }))
+          .sort((a, b) => a.label.localeCompare(b.label))  // ← sorted here
         opts.push({ value: 'Other|||Other', label: 'Other',
                     category: 'Other', subcategory: 'Other' })
         setAllCats(opts)
       })
-      .catch(() => {})  // non-fatal — dropdown will be empty
+      .catch(() => {})
   }, [])
+
+  useEffect(() => { loadCats() }, [loadCats])
 
   function handleCategoryChange(txnId, value) {
     const [cat, sub] = value.split('|||')
@@ -84,30 +81,40 @@ export default function Reconciliation({ year }) {
     const entries = Object.entries(pending)
     if (entries.length === 0) return
     setSaving(true); setSaveResult(null)
-
     let saved = 0, failed = 0
     for (const [txnId, update] of entries) {
       try {
         await transactions.updateCategory(txnId, update.category_name, update.subcategory)
         saved++
-      } catch {
-        failed++
-      }
+      } catch { failed++ }
     }
-
     setSaveResult({ saved, failed })
     setSaving(false)
-
-    if (saved > 0) {
-      // Reload to reflect changes
-      setPending({})
-      load()
-    }
+    if (saved > 0) { setPending({}); load() }
   }
 
-  function resetChanges() {
-    setPending({})
-    setSaveResult(null)
+  async function handleAddCategory(e) {
+    e.preventDefault()
+    if (!newCat.name.trim()) { setAddError('Category name is required'); return }
+    setAddSaving(true); setAddError(''); setAddSuccess('')
+
+    try {
+      await transactions.createCategory({
+        name:         newCat.name.trim(),
+        subcategory:  newCat.subcategory.trim() || newCat.name.trim(),
+        is_essential: newCat.is_essential,
+        color_code:   newCat.color_code,
+      })
+      const label = newCat.subcategory.trim()
+        ? `${newCat.name} / ${newCat.subcategory}`
+        : newCat.name
+      setAddSuccess(`✓ Added: ${label}`)
+      setNewCat({ name: '', subcategory: '', is_essential: false, color_code: '#6b7280' })
+      loadCats()
+    } catch (err) {
+      setAddError(err.message)
+    }
+    setAddSaving(false)
   }
 
   if (error)              return <ErrorMsg message={error} />
@@ -116,17 +123,164 @@ export default function Reconciliation({ year }) {
   const otherCat   = catData.categories.find(c => c.category === 'Other')
   const otherPct   = otherCat?.pct || 0
   const otherTotal = otherCat?.total || 0
-  const pendingCount = Object.keys(pending).length
-  const sortedOthers = [...others].sort((a, b) => b.amount - a.amount)
+  const pendingCount   = Object.keys(pending).length
+  const sortedOthers   = [...others].sort((a, b) => b.amount - a.amount)
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reconciliation</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-          Review and fix uncategorised transactions — {year}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reconciliation</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Review and fix uncategorised transactions — {year}
+          </p>
+        </div>
+        <button
+          onClick={() => { setShowAddForm(f => !f); setAddError(''); setAddSuccess('') }}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg
+                     bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium
+                     transition-colors"
+        >
+          {showAddForm ? <X size={15} /> : <Plus size={15} />}
+          {showAddForm ? 'Cancel' : 'Add Category'}
+        </button>
       </div>
+
+      {/* Add category form */}
+      {showAddForm && (
+        <Card>
+          <SectionTitle>Add New Category</SectionTitle>
+          <form onSubmit={handleAddCategory} className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500
+                                   dark:text-gray-400 uppercase mb-1">
+                  Category Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newCat.name}
+                  onChange={e => setNewCat(p => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g. Travel"
+                  className="w-full px-3 py-2 text-sm rounded-lg border
+                             border-gray-200 dark:border-gray-600
+                             bg-white dark:bg-gray-700
+                             text-gray-900 dark:text-white
+                             focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500
+                                   dark:text-gray-400 uppercase mb-1">
+                  Subcategory
+                  <span className="normal-case font-normal ml-1 text-gray-400">
+                    (leave blank to match category name)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={newCat.subcategory}
+                  onChange={e => setNewCat(p => ({ ...p, subcategory: e.target.value }))}
+                  placeholder="e.g. International"
+                  className="w-full px-3 py-2 text-sm rounded-lg border
+                             border-gray-200 dark:border-gray-600
+                             bg-white dark:bg-gray-700
+                             text-gray-900 dark:text-white
+                             focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500
+                                   dark:text-gray-400 uppercase mb-1">Type</label>
+                <select
+                  value={String(newCat.is_essential)}
+                  onChange={e => setNewCat(p => ({
+                    ...p, is_essential: e.target.value === 'true'
+                  }))}
+                  className="w-full px-3 py-2 text-sm rounded-lg border
+                             border-gray-200 dark:border-gray-600
+                             bg-white dark:bg-gray-700
+                             text-gray-900 dark:text-white
+                             focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="false">Discretionary</option>
+                  <option value="true">Essential</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500
+                                   dark:text-gray-400 uppercase mb-1">Color</label>
+                <div className="flex gap-2 flex-wrap">
+                  {COLOR_OPTIONS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewCat(p => ({ ...p, color_code: color }))}
+                      className={`w-7 h-7 rounded-full border-2 transition-transform
+                                  ${newCat.color_code === color
+                                    ? 'border-gray-900 dark:border-white scale-110'
+                                    : 'border-transparent'}`}
+                      style={{ background: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="flex items-center gap-3 p-3 rounded-lg
+                            bg-gray-50 dark:bg-gray-700/30 text-sm">
+              <span className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ background: newCat.color_code }} />
+              <span className="font-medium text-gray-900 dark:text-white">
+                {newCat.name || 'Category Name'}
+                {newCat.subcategory && newCat.subcategory !== newCat.name &&
+                  <span className="text-gray-400"> / {newCat.subcategory}</span>}
+              </span>
+              <Badge color={newCat.is_essential ? 'green' : 'blue'}>
+                {newCat.is_essential ? 'Essential' : 'Discretionary'}
+              </Badge>
+            </div>
+
+            {addError && (
+              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50
+                            dark:bg-red-900/20 rounded-lg px-3 py-2">{addError}</p>
+            )}
+            {addSuccess && (
+              <p className="text-sm text-green-600 dark:text-green-400 bg-green-50
+                            dark:bg-green-900/20 rounded-lg px-3 py-2">{addSuccess}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={addSaving || !newCat.name.trim()}
+                className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700
+                           disabled:opacity-50 text-white font-medium text-sm
+                           transition-colors flex items-center gap-2"
+              >
+                <Plus size={14} />
+                {addSaving ? 'Adding…' : 'Add Category'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewCat({
+                  name: '', subcategory: '', is_essential: false, color_code: '#6b7280'
+                })}
+                className="px-4 py-2 rounded-lg border border-gray-200
+                           dark:border-gray-600 text-gray-600 dark:text-gray-400
+                           text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       {/* Other summary banner */}
       <div className={`rounded-2xl border p-5 flex items-center gap-4
@@ -150,7 +304,6 @@ export default function Reconciliation({ year }) {
         </div>
       </div>
 
-      {/* Save result banner */}
       {saveResult && (
         <div className={`rounded-xl p-4 text-sm font-medium
                          ${saveResult.failed === 0
@@ -162,31 +315,22 @@ export default function Reconciliation({ year }) {
         </div>
       )}
 
-      {/* Uncategorised transactions with inline editor */}
+      {/* Uncategorised transactions */}
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <SectionTitle>
-            Uncategorised Transactions ({others.length})
-          </SectionTitle>
+          <SectionTitle>Uncategorised Transactions ({others.length})</SectionTitle>
           {pendingCount > 0 && (
             <div className="flex gap-2">
-              <button
-                onClick={resetChanges}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm
-                           text-gray-500 hover:text-gray-700 dark:text-gray-400
-                           border border-gray-200 dark:border-gray-600
-                           rounded-lg transition-colors"
-              >
-                <RotateCcw size={13} />
-                Reset
+              <button onClick={() => { setPending({}); setSaveResult(null) }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm
+                                 text-gray-500 border border-gray-200 dark:border-gray-600
+                                 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <RotateCcw size={13} /> Reset
               </button>
-              <button
-                onClick={saveAll}
-                disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-sm
-                           bg-blue-600 hover:bg-blue-700 disabled:opacity-50
-                           text-white rounded-lg transition-colors font-medium"
-              >
+              <button onClick={saveAll} disabled={saving}
+                      className="flex items-center gap-1.5 px-4 py-1.5 text-sm
+                                 bg-blue-600 hover:bg-blue-700 disabled:opacity-50
+                                 text-white rounded-lg font-medium">
                 <Save size={13} />
                 {saving ? 'Saving…' : `Save ${pendingCount} change${pendingCount !== 1 ? 's' : ''}`}
               </button>
@@ -205,9 +349,7 @@ export default function Reconciliation({ year }) {
                 <tr>
                   {['Date','Description','Amount','Card','Assign Category'].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs font-medium
-                                           text-gray-500 dark:text-gray-400 uppercase">
-                      {h}
-                    </th>
+                                           text-gray-500 dark:text-gray-400 uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -216,14 +358,10 @@ export default function Reconciliation({ year }) {
                   const hasPending = !!pending[t.id]
                   return (
                     <tr key={t.id}
-                        className={`transition-colors
-                          ${hasPending
-                            ? 'bg-blue-50 dark:bg-blue-900/10'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'
-                          }`}>
-                      <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap">
-                        {t.date}
-                      </td>
+                        className={hasPending
+                          ? 'bg-blue-50 dark:bg-blue-900/10'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'}>
+                      <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap">{t.date}</td>
                       <td className="py-2.5 px-3 text-gray-900 dark:text-white max-w-xs truncate">
                         {t.description}
                       </td>
@@ -240,17 +378,14 @@ export default function Reconciliation({ year }) {
                             ? `${pending[t.id].category_name}|||${pending[t.id].subcategory}`
                             : 'Other|||Other'}
                           onChange={e => handleCategoryChange(t.id, e.target.value)}
-                          className="text-sm rounded-lg border
-                                     border-gray-200 dark:border-gray-600
-                                     bg-white dark:bg-gray-800
-                                     text-gray-700 dark:text-gray-300
-                                     px-2 py-1.5 outline-none w-full max-w-[220px]
+                          className="text-sm rounded-lg border border-gray-200
+                                     dark:border-gray-600 bg-white dark:bg-gray-800
+                                     text-gray-700 dark:text-gray-300 px-2 py-1.5
+                                     outline-none w-full max-w-[220px]
                                      focus:ring-2 focus:ring-blue-500"
                         >
                           {allCats.map(opt => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
                       </td>
@@ -262,16 +397,12 @@ export default function Reconciliation({ year }) {
           </div>
         )}
 
-        {/* Bottom save button for long lists */}
         {others.length > 5 && pendingCount > 0 && (
           <div className="mt-4 flex justify-end">
-            <button
-              onClick={saveAll}
-              disabled={saving}
-              className="flex items-center gap-2 px-5 py-2 text-sm
-                         bg-blue-600 hover:bg-blue-700 disabled:opacity-50
-                         text-white rounded-lg transition-colors font-medium"
-            >
+            <button onClick={saveAll} disabled={saving}
+                    className="flex items-center gap-2 px-5 py-2 text-sm
+                               bg-blue-600 hover:bg-blue-700 disabled:opacity-50
+                               text-white rounded-lg font-medium">
               <Save size={14} />
               {saving ? 'Saving…' : `Save ${pendingCount} change${pendingCount !== 1 ? 's' : ''}`}
             </button>
@@ -279,7 +410,7 @@ export default function Reconciliation({ year }) {
         )}
       </Card>
 
-      {/* Category cross-check table */}
+      {/* Category totals cross-check */}
       <Card>
         <SectionTitle>All Category Totals</SectionTitle>
         <div className="overflow-x-auto">
@@ -288,9 +419,7 @@ export default function Reconciliation({ year }) {
               <tr>
                 {['Category','Subcategory','Total','%','Txns','Type'].map(h => (
                   <th key={h} className="text-left py-2 px-3 text-xs font-medium
-                                         text-gray-500 dark:text-gray-400 uppercase">
-                    {h}
-                  </th>
+                                         text-gray-500 dark:text-gray-400 uppercase">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -298,11 +427,10 @@ export default function Reconciliation({ year }) {
               {catData.categories.map((c, i) => (
                 <tr key={i}
                     className={`hover:bg-gray-50 dark:hover:bg-gray-700/30
-                                ${c.category === 'Other'
-                                  ? 'bg-amber-50 dark:bg-amber-900/10' : ''}`}>
+                                ${c.category === 'Other' ? 'bg-amber-50 dark:bg-amber-900/10' : ''}`}>
                   <td className="py-2.5 px-3 font-medium text-gray-900 dark:text-white">
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0"
+                      <span className="w-2 h-2 rounded-full"
                             style={{ background: c.color_code || '#6b7280' }} />
                       {c.category}
                     </div>
@@ -311,9 +439,7 @@ export default function Reconciliation({ year }) {
                     {c.subcategory !== c.category ? c.subcategory : '—'}
                   </td>
                   <td className="py-2.5 px-3 text-right font-semibold
-                                 text-gray-900 dark:text-white">
-                    {fmtDec(c.total)}
-                  </td>
+                                 text-gray-900 dark:text-white">{fmtDec(c.total)}</td>
                   <td className="py-2.5 px-3 text-right text-gray-500">{c.pct}%</td>
                   <td className="py-2.5 px-3 text-right text-gray-500">{c.txn_count}</td>
                   <td className="py-2.5 px-3">
