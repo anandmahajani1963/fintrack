@@ -60,6 +60,9 @@ test_output/
 
 .git-credentials
 /home/fintrack/.git-credentials
+**/.git-credentials
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 
 .bash_history
 
