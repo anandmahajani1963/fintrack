@@ -68,6 +68,7 @@ class Transaction(Base):
     category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id",
                            ondelete="SET NULL"), nullable=True)
     category_name = Column(String, nullable=False, default="Other")
+    subcategory   = Column(String, nullable=True)
     is_essential  = Column(Boolean, nullable=False, default=False)
     is_large      = Column(Boolean, nullable=False, default=False)
     source_file   = Column(String, nullable=True)
