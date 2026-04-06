@@ -7,7 +7,7 @@ import { useAuth }   from '../context/AuthContext'
 import { analytics } from '../api/client'
 import { Card, StatCard, Loading, ErrorMsg, SectionTitle,
          fmt, fmtDec } from '../components/ui'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, XCircle, X } from 'lucide-react'
 
 export default function Dashboard({ year }) {
   const { password }      = useAuth()
@@ -15,6 +15,8 @@ export default function Dashboard({ year }) {
   const [trend, setTrend] = useState(null)
   const [large, setLarge] = useState(null)
   const [error, setError] = useState('')
+  const [alerts, setAlerts] = useState([])
+  const [dismissedAlerts, setDismissedAlerts] = useState(false)
 
   useEffect(() => {
     if (!password) return
@@ -23,6 +25,23 @@ export default function Dashboard({ year }) {
     analytics.trend(year).then(setTrend).catch(e => setError(e.message))
     analytics.largeExpenses(password, year, 500)
       .then(setLarge).catch(() => setLarge({ count: 0, items: [] }))
+    setDismissedAlerts(false)
+    // Import budget status inline to avoid circular dependency
+    fetch('/api/v1/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: sessionStorage.getItem('refresh_token') || '' })
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return null
+        return fetch(`/api/v1/budget/status?year=${year}`, {
+          headers: { 'Authorization': `Bearer ${d.access_token}` }
+        })
+      })
+      .then(r => r && r.ok ? r.json() : { alerts: [] })
+      .then(d => { if (d) setAlerts(d.alerts || []) })
+      .catch(() => {})
   }, [year, password])
 
   if (error) return <ErrorMsg message={error} />
@@ -41,6 +60,44 @@ export default function Dashboard({ year }) {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Financial overview — {year}</p>
       </div>
+      {/* Budget alert banner */}
+      {alerts.length > 0 && !dismissedAlerts && (
+        <div className={`rounded-xl border p-4 flex items-start justify-between gap-3
+                         ${alerts.some(a => a.status === 'red')
+                           ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                           : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                         }`}>
+          <div className="flex items-start gap-3 flex-1">
+            {alerts.some(a => a.status === 'red')
+              ? <XCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
+              : <AlertTriangle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+            }
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                {alerts.filter(a => a.status === 'red').length > 0
+                  ? `${alerts.filter(a => a.status === 'red').length} budget${alerts.filter(a => a.status === 'red').length > 1 ? 's' : ''} exceeded`
+                  : `${alerts.length} budget${alerts.length > 1 ? 's' : ''} near limit`
+                }
+              </p>
+              <div className="space-y-0.5">
+                {alerts.slice(0, 3).map((a, i) => (
+                  <p key={i} className={`text-xs ${a.status === 'red' ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                    {a.message}
+                  </p>
+                ))}
+                {alerts.length > 3 && (
+                  <p className="text-xs text-gray-400">+{alerts.length - 3} more — check Budgets page</p>
+                )}
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setDismissedAlerts(true)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Spend" value={fmt(catData.grand_total)}
                   sub={`${catData.categories.length} categories`} color="blue" />

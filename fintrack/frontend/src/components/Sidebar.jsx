@@ -1,7 +1,7 @@
 // ============================================================
 // fintrack — Sidebar navigation
 // File: src/components/Sidebar.jsx
-// Version: 1.1 — 2026-03-27
+// Version: 1.2 — 2026-04-05
 // Changes: Added Members, Reconciliation, Import nav items
 // ============================================================
 
@@ -9,7 +9,7 @@ import React from 'react'
 import {
   LayoutDashboard, PieChart, CalendarDays,
   List, Zap, LogOut, TrendingUp, Users,
-  ClipboardCheck, Upload
+  ClipboardCheck, Upload, DollarSign
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { id: 'transactions',   label: 'Transactions',   icon: List            },
   { id: 'utilities',      label: 'Utilities',      icon: Zap             },
   { id: 'members',        label: 'Members',        icon: Users           },
+  { id: 'budgets',        label: 'Budgets',        icon: DollarSign      },
   { id: 'reconciliation', label: 'Reconciliation', icon: ClipboardCheck  },
   { id: 'import',         label: 'Import Data',    icon: Upload          },
 ]

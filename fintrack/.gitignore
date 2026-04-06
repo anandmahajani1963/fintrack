@@ -66,5 +66,5 @@ test_output/
 
 .bash_history
 
-../.cache/*
-../.mozilla/*
+../../.cache/
+../../.mozilla/

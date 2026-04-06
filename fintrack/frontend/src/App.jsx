@@ -1,11 +1,12 @@
 // ============================================================
 // fintrack — App root component
 // File: src/App.jsx
-// Version: 1.2 — 2026-03-31
+// Version: 1.3 — 2026-04-05
 // Changes:
 //   v1.0  2026-03-26  Initial implementation
 //   v1.1  2026-03-27  Added Import, Members, Reconciliation pages
 //   v1.2  2026-03-31  Added PasswordPrompt for post-refresh session restore
+//   v1.3  2026-04-05  Added Budgets page
 // ============================================================
 
 import React, { useState } from 'react'
@@ -21,6 +22,7 @@ import Utilities      from './pages/Utilities'
 import Members        from './pages/Members'
 import Reconciliation from './pages/Reconciliation'
 import Import         from './pages/Import'
+import Budgets        from './pages/Budgets'
 
 const PAGES = {
   dashboard:      Dashboard,
@@ -31,6 +33,7 @@ const PAGES = {
   members:        Members,
   reconciliation: Reconciliation,
   import:         Import,
+  budgets:        Budgets,
 }
 
 function AppInner() {
