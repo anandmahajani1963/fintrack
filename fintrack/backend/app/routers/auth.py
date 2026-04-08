@@ -104,12 +104,18 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
     logger.info(f"New user registered: {user.email} (id={user.id})")
 
-    return TokenResponse(
-        access_token  = create_access_token(str(user.id)),
-        refresh_token = create_refresh_token(str(user.id)),
-        user_id       = str(user.id),
-        email         = user.email,
-    )
+    # Check if MFA is required
+    mfa_required = getattr(user, 'mfa_enabled', False)
+
+    return {
+        "access_token":  create_access_token(str(user.id)),
+        "refresh_token": create_refresh_token(str(user.id)),
+        "user_id":       str(user.id),
+        "email":         user.email,
+        "mfa_required":  mfa_required,
+        "mfa_type":      getattr(user, 'mfa_type', 'none'),
+        "token_type":    "bearer",
+    }
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -138,12 +144,18 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
     logger.info(f"User logged in: {user.email}")
 
-    return TokenResponse(
-        access_token  = create_access_token(str(user.id)),
-        refresh_token = create_refresh_token(str(user.id)),
-        user_id       = str(user.id),
-        email         = user.email,
-    )
+    # Check if MFA is required
+    mfa_required = getattr(user, 'mfa_enabled', False)
+
+    return {
+        "access_token":  create_access_token(str(user.id)),
+        "refresh_token": create_refresh_token(str(user.id)),
+        "user_id":       str(user.id),
+        "email":         user.email,
+        "mfa_required":  mfa_required,
+        "mfa_type":      getattr(user, 'mfa_type', 'none'),
+        "token_type":    "bearer",
+    }
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -170,12 +182,18 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
             detail="User not found",
         )
 
-    return TokenResponse(
-        access_token  = create_access_token(str(user.id)),
-        refresh_token = create_refresh_token(str(user.id)),
-        user_id       = str(user.id),
-        email         = user.email,
-    )
+    # Check if MFA is required
+    mfa_required = getattr(user, 'mfa_enabled', False)
+
+    return {
+        "access_token":  create_access_token(str(user.id)),
+        "refresh_token": create_refresh_token(str(user.id)),
+        "user_id":       str(user.id),
+        "email":         user.email,
+        "mfa_required":  mfa_required,
+        "mfa_type":      getattr(user, 'mfa_type', 'none'),
+        "token_type":    "bearer",
+    }
 
 
 @router.get("/me", response_model=UserResponse)

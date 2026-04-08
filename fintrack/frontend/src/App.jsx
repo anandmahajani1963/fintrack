@@ -1,17 +1,17 @@
 // ============================================================
 // fintrack — App root component
 // File: src/App.jsx
-// Version: 1.3 — 2026-04-05
+// Version: 1.4 — 2026-04-06
 // Changes:
-//   v1.0  2026-03-26  Initial implementation
-//   v1.1  2026-03-27  Added Import, Members, Reconciliation pages
-//   v1.2  2026-03-31  Added PasswordPrompt for post-refresh session restore
 //   v1.3  2026-04-05  Added Budgets page
+//   v1.4  2026-04-06  Added Register and MFASetup flows
 // ============================================================
 
 import React, { useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Login          from './pages/Login'
+import Register       from './pages/Register'
+import MFASetup       from './pages/MFASetup'
 import PasswordPrompt from './components/PasswordPrompt'
 import Sidebar        from './components/Sidebar'
 import Dashboard      from './pages/Dashboard'
@@ -37,14 +37,43 @@ const PAGES = {
 }
 
 function AppInner() {
-  const { isLoggedIn, needsPassword } = useAuth()
-  const [page, setPage] = useState('dashboard')
-  const [year, setYear] = useState(2025)
+  const {
+    isLoggedIn, needsPassword,
+    mfaSetupToken, startMFASetup, completeMFASetup,
+    login,
+  } = useAuth()
 
-  // Not logged in → show login page
-  if (!isLoggedIn) return <Login />
+  const [page, setPage]       = useState('dashboard')
+  const [year, setYear]       = useState(2025)
+  const [showRegister, setShowRegister] = useState(false)
 
-  // Session restored but password needed → show password prompt
+  // Show MFA setup if triggered after registration
+  if (mfaSetupToken) {
+    return (
+      <MFASetup
+        token={mfaSetupToken.token}
+        email={mfaSetupToken.email}
+        onComplete={completeMFASetup}
+      />
+    )
+  }
+
+  if (!isLoggedIn) {
+    if (showRegister) {
+      return (
+        <Register
+          onRegistered={(loginData, pwd) => {
+            // After registration, trigger MFA setup
+            startMFASetup(loginData.access_token, loginData.email, pwd)
+            setShowRegister(false)
+          }}
+          onBack={() => setShowRegister(false)}
+        />
+      )
+    }
+    return <Login onRegister={() => setShowRegister(true)} />
+  }
+
   if (needsPassword) return <PasswordPrompt />
 
   const PageComponent = PAGES[page] || Dashboard

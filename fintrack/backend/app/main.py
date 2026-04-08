@@ -7,6 +7,7 @@
 #   v1.1  2026-03-22  Added analytics and transactions routers
 #   v1.2  2026-03-30  Added X-Fintrack-Password to CORS allowed headers
 #   v1.3  2026-04-05  Added budget router
+#   v1.4  2026-04-06  Added MFA router
 #                     so browser can send password as header not query param
 # ============================================================
 
@@ -63,11 +64,12 @@ app.add_middleware(
     expose_headers=["X-Fintrack-Password"],
 )
 
-from app.routers import auth, transactions, analytics, budget
+from app.routers import auth, transactions, analytics, budget, mfa
 app.include_router(auth.router,         prefix="/api/v1/auth",         tags=["auth"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 app.include_router(analytics.router,    prefix="/api/v1/analytics",    tags=["analytics"])
 app.include_router(budget.router,       prefix="/api/v1/budget",       tags=["budget"])
+app.include_router(mfa.router,         prefix="/api/v1/mfa",         tags=["mfa"])
 
 
 @app.get("/health", tags=["system"])

@@ -53,6 +53,13 @@ class Settings(BaseSettings):
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
+
+    # SMTP settings for email OTP
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASS: str = ""
+    SMTP_FROM: str = ""
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -66,3 +73,4 @@ def get_settings() -> Settings:
 
 # Single shared instance used across the app
 settings = get_settings()
+

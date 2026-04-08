@@ -35,6 +35,8 @@ class TokenResponse(BaseModel):
     token_type:    str = "bearer"
     user_id:       str
     email:         str
+    mfa_required:  bool = False
+    mfa_type:      str  = "none"
 
 
 class RefreshRequest(BaseModel):

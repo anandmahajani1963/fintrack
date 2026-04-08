@@ -78,6 +78,8 @@ class Transaction(Base):
     account      = relationship("Account",  back_populates="transactions")
     category_rel = relationship("Category", back_populates="transactions",
                                 foreign_keys=[category_id])
+    user         = relationship("User",     back_populates="transactions",
+                                foreign_keys=[user_id])
 
     def __repr__(self):
         return f"<Transaction date={self.txn_date} amount={self.amount} cat={self.category_name}>"

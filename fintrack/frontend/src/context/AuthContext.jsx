@@ -1,12 +1,13 @@
 // ============================================================
 // fintrack — Auth context
 // File: src/context/AuthContext.jsx
-// Version: 1.2 — 2026-03-31
+// Version: 1.3 — 2026-04-06
 // Changes:
-//   v1.0  2026-03-26  Initial implementation
-//   v1.1  2026-03-30  Session restore on page refresh
-//   v1.2  2026-03-31  Handle "session restored but no password" state
-//                     Pages show password prompt instead of spinning forever
+//   v1.0  2026-03-26  Initial
+//   v1.1  2026-03-30  Session restore on refresh
+//   v1.2  2026-03-31  Password prompt after restore
+//   v1.3  2026-04-06  MFA support — login returns mfa_required flag
+//                     Registration flow with MFA setup
 // ============================================================
 
 import React, {
@@ -21,14 +22,15 @@ export function AuthProvider({ children }) {
   const [user, setUser]           = useState(null)
   const [password, setPassword]   = useState('')
   const [restoring, setRestoring] = useState(true)
-  // True when session was restored but password not available
   const [needsPassword, setNeedsPassword] = useState(false)
+  // MFA setup state — set after registration
+  const [mfaSetupToken, setMfaSetupToken] = useState(null)
 
   useEffect(() => {
     auth.tryRestoreSession().then(restored => {
       if (restored) {
         setUser({ email: auth.email() })
-        setNeedsPassword(true)  // session ok, but password needs re-entry
+        setNeedsPassword(true)
       }
       setRestoring(false)
     })
@@ -36,11 +38,34 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, pwd) => {
     const data = await auth.login(email, pwd)
+    // If MFA required, don't set user yet — return data for caller to handle
+    if (data.mfa_required) {
+      return data
+    }
     setUser({ id: data.user_id, email: data.email })
     setPassword(pwd)
     setNeedsPassword(false)
     return data
   }, [])
+
+  const completeMFALogin = useCallback((email, pwd, userData) => {
+    setUser({ id: userData.user_id, email })
+    setPassword(pwd)
+    setNeedsPassword(false)
+  }, [])
+
+  const startMFASetup = useCallback((token, email, pwd) => {
+    setMfaSetupToken({ token, email, pwd })
+  }, [])
+
+  const completeMFASetup = useCallback(() => {
+    if (mfaSetupToken) {
+      setUser({ email: mfaSetupToken.email })
+      setPassword(mfaSetupToken.pwd)
+      setMfaSetupToken(null)
+      setNeedsPassword(false)
+    }
+  }, [mfaSetupToken])
 
   const supplyPassword = useCallback((pwd) => {
     setPassword(pwd)
@@ -52,6 +77,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     setPassword('')
     setNeedsPassword(false)
+    setMfaSetupToken(null)
   }, [])
 
   if (restoring) {
@@ -68,7 +94,9 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, password, login, logout,
       isLoggedIn: !!user,
-      needsPassword, supplyPassword
+      needsPassword, supplyPassword,
+      mfaSetupToken, startMFASetup, completeMFASetup,
+      completeMFALogin,
     }}>
       {children}
     </AuthContext.Provider>
