@@ -17,7 +17,7 @@ export default function Register({ onRegistered, onBack }) {
 
   function validate() {
     if (!email)    return 'Email is required'
-    if (password.length < 8) return 'Password must be at least 8 characters'
+    if (password.length < 10) return 'Password must be at least 10 characters'
     if (!/[A-Z]/.test(password)) return 'Password must contain an uppercase letter'
     if (!/[0-9]/.test(password)) return 'Password must contain a number'
     if (password !== confirm) return 'Passwords do not match'
@@ -46,9 +46,10 @@ export default function Register({ onRegistered, onBack }) {
       })
       const loginData = await loginR.json()
       if (!loginR.ok) throw new Error('Registration succeeded but login failed')
+      console.log("onRegistered called with:", loginData.email, "pwd length:", password.length)
       onRegistered(loginData, password)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || String(err))
     }
     setLoading(false)
   }
@@ -135,7 +136,7 @@ export default function Register({ onRegistered, onBack }) {
           {/* Password strength hints */}
           <div className="space-y-1">
             {[
-              ['At least 8 characters', password.length >= 8],
+              ['At least 10 characters', password.length >= 10],
               ['One uppercase letter',  /[A-Z]/.test(password)],
               ['One number',            /[0-9]/.test(password)],
               ['Passwords match',       confirm.length > 0 && password === confirm],

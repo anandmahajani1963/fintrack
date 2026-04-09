@@ -64,7 +64,8 @@ function AppInner() {
         <Register
           onRegistered={(loginData, pwd) => {
             // After registration, trigger MFA setup
-            startMFASetup(loginData.access_token, loginData.email, pwd)
+            // loginData.email comes from the login response after registration
+            startMFASetup(loginData.access_token, loginData.email || '', pwd)
             setShowRegister(false)
           }}
           onBack={() => setShowRegister(false)}

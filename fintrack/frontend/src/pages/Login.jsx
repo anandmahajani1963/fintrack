@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext'
 import { TrendingUp, Lock, Mail } from 'lucide-react'
 
 export default function Login({ onRegister }) {
-  const { login }               = useAuth()
+  const { login, completeMFALogin } = useAuth()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [mfaCode, setMfaCode]   = useState('')
@@ -65,8 +65,8 @@ export default function Login({ onRegister }) {
       })
       const data = await r.json()
       if (!r.ok) throw new Error(data.detail || 'Invalid code')
-      // MFA verified — complete login
-      await login(email, password)
+      // MFA verified — set user and password directly without re-triggering MFA check
+      completeMFALogin(email, password, { user_id: '', email })
     } catch (err) {
       setError(err.message)
     }

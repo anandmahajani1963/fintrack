@@ -178,7 +178,7 @@ def verify_totp(
         raise HTTPException(status_code=400, detail="TOTP not set up. Call /setup/totp first.")
 
     totp = pyotp.TOTP(user.totp_secret)
-    if not totp.verify(body.code.strip(), valid_window=1):
+    if not totp.verify(body.code.strip(), valid_window=2):
         raise HTTPException(status_code=400, detail="Invalid code. Try again.")
 
     db.query(User).filter(User.id == current_user.id).update({
@@ -269,7 +269,7 @@ def mfa_challenge(
 
     if user.mfa_type == 'totp':
         totp = pyotp.TOTP(user.totp_secret)
-        if not totp.verify(body.code.strip(), valid_window=1):
+        if not totp.verify(body.code.strip(), valid_window=2):
             raise HTTPException(status_code=400, detail="Invalid authenticator code.")
 
     elif user.mfa_type == 'email':
