@@ -67,14 +67,16 @@ class UserKey(Base):
 class Account(Base):
     __tablename__ = "accounts"
 
-    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id     = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
-                         nullable=False, index=True)
-    provider    = Column(String, nullable=False)
-    label       = Column(String, nullable=True)
-    member_name = Column(Text, nullable=True)
-    source      = Column(String, nullable=False, default='csv_import')
-    created_at  = Column(DateTime(timezone=True), server_default=func.now())
+    id            = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id       = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
+                           nullable=False, index=True)
+    provider      = Column(String, nullable=False)
+    account_label = Column(String, nullable=False)
+    member_name   = Column(Text, nullable=True)
+    last_four     = Column(String, nullable=True)
+    is_active     = Column(Boolean, nullable=False, default=True)
+    source_type   = Column(String, nullable=False, default='csv_import')
+    created_at    = Column(DateTime(timezone=True), server_default=func.now())
 
     user         = relationship("User",        back_populates="accounts")
     transactions = relationship("Transaction", back_populates="account",

@@ -58,7 +58,6 @@ def _get_or_create_account(
     accounts = db.query(Account).filter(
         Account.user_id   == user_id,
         Account.provider  == provider,
-        Account.is_active == True,
     ).all()
 
     for acc in accounts:
@@ -198,7 +197,6 @@ def list_accounts(
     enc_key  = _get_user_key(current_user.id, password, db)
     accounts = db.query(Account).filter(
         Account.user_id   == current_user.id,
-        Account.is_active == True,
     ).all()
 
     return [
