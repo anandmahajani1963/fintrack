@@ -1,0 +1,48 @@
+# ============================================================
+# fintrack — PostgreSQL PersistentVolume
+# File: k8s/01-postgres-pv.yaml
+# 
+# Uses hostPath pointing to existing LVM mount /srv/postgres
+# on oel9-ccc-db node. No data migration needed.
+# nodeAffinity ensures pod always schedules on DB VM.
+# ============================================================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: fintrack-postgres-pv
+  labels:
+    app: fintrack-postgres
+spec:
+  capacity:
+    storage: 8Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: fintrack-local
+  hostPath:
+    path: /srv/postgres
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - oel9-ccc-db.digilinx.us
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fintrack-postgres-pvc
+  namespace: fintrack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fintrack-local
+  resources:
+    requests:
+      storage: 8Gi
+  selector:
+    matchLabels:
+      app: fintrack-postgres

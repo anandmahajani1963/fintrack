@@ -1,0 +1,101 @@
+# ============================================================
+# fintrack — FastAPI backend Deployment
+# File: k8s/03-api.yaml
+#
+# 2 replicas — can run on any node except DB VM.
+# Connects to postgres via ClusterIP service.
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fintrack-api
+  namespace: fintrack
+  labels:
+    app: fintrack-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fintrack-api
+  template:
+    metadata:
+      labels:
+        app: fintrack-api
+    spec:
+      # Prefer API and Dev VMs, avoid DB VM
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values: [fintrack-api]
+                topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values: [oel9-ccc-db.digilinx.us]
+
+      containers:
+        - name: api
+          image: backend-api:latest
+          imagePullPolicy: Never   # use locally built image
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: fintrack-postgres.fintrack.svc.cluster.local
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: fintrack
+            - name: DB_USER
+              value: fintrack
+            - name: API_ENV
+              value: production
+            - name: CORS_ORIGINS
+              value: '["http://192.168.1.171:3000","http://192.168.1.171","http://localhost:3000"]'
+          envFrom:
+            - secretRef:
+                name: fintrack-api-secret
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fintrack-api
+  namespace: fintrack
+  labels:
+    app: fintrack-api
+spec:
+  type: ClusterIP
+  selector:
+    app: fintrack-api
+  ports:
+    - port: 8000
+      targetPort: 8000

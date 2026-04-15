@@ -1,0 +1,90 @@
+# ============================================================
+# fintrack — PostgreSQL 17 StatefulSet
+# File: k8s/02-postgres.yaml
+#
+# Runs on oel9-ccc-db node via nodeSelector.
+# Uses existing /srv/postgres data directory.
+# ============================================================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fintrack-postgres
+  namespace: fintrack
+  labels:
+    app: fintrack-postgres
+spec:
+  serviceName: fintrack-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fintrack-postgres
+  template:
+    metadata:
+      labels:
+        app: fintrack-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: oel9-ccc-db.digilinx.us
+
+      # Run as the same user that owns /srv/postgres (avahi = uid 70)
+      securityContext:
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: fintrack
+            - name: POSTGRES_USER
+              value: fintrack
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fintrack-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "fintrack", "-d", "fintrack"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "fintrack", "-d", "fintrack"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: fintrack-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fintrack-postgres
+  namespace: fintrack
+  labels:
+    app: fintrack-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: fintrack-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

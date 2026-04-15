@@ -1,0 +1,23 @@
+# ============================================================
+# fintrack — API NodePort Service
+# File: k8s/05-api-nodeport.yaml
+#
+# Exposes the API on port 30800 on all nodes.
+# During migration: existing Docker API still on 8000,
+# k8s API available on 30800 for testing.
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: fintrack-api-nodeport
+  namespace: fintrack
+  labels:
+    app: fintrack-api
+spec:
+  type: NodePort
+  selector:
+    app: fintrack-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30800

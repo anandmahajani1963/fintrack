@@ -1,0 +1,83 @@
+# ============================================================
+# fintrack — React frontend Deployment
+# File: k8s/04-frontend.yaml
+#
+# 2 replicas. Nginx serves static files + proxies /api to API service.
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fintrack-frontend
+  namespace: fintrack
+  labels:
+    app: fintrack-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fintrack-frontend
+  template:
+    metadata:
+      labels:
+        app: fintrack-frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values: [fintrack-frontend]
+                topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values: [worker]
+
+      containers:
+        - name: frontend
+          image: frontend-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fintrack-frontend
+  namespace: fintrack
+  labels:
+    app: fintrack-frontend
+spec:
+  type: NodePort
+  selector:
+    app: fintrack-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080   # accessible at any-node-ip:30080
