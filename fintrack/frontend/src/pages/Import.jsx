@@ -42,14 +42,7 @@ export default function Import() {
     if (!password) return
     setImporting(true)
 
-    // Get fresh token
-    const authR = await fetch(`${API_BASE}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: '', password: '' })  // already logged in
-    }).catch(() => null)
-
-    // Use token from sessionStorage refresh
+    // Get fresh token via refresh
     const refreshR = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
