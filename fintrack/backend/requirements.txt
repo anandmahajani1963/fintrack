@@ -19,6 +19,8 @@ cryptography==43.0.3
 # MFA
 pyotp==2.9.0
 qrcode[pil]==8.0
+# Export
+reportlab==4.2.5
 # Encryption — zero-knowledge model
 PyNaCl==1.5.0
 # Data processing

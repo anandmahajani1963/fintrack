@@ -23,6 +23,7 @@ import Members        from './pages/Members'
 import Reconciliation from './pages/Reconciliation'
 import Import         from './pages/Import'
 import Budgets        from './pages/Budgets'
+import Export         from './pages/Export'
 
 const PAGES = {
   dashboard:      Dashboard,
@@ -34,6 +35,7 @@ const PAGES = {
   reconciliation: Reconciliation,
   import:         Import,
   budgets:        Budgets,
+  export:         Export,
 }
 
 function AppInner() {
