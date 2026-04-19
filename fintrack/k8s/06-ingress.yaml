@@ -1,0 +1,46 @@
+# ============================================================
+# fintrack — Nginx Ingress
+# File: k8s/06-ingress.yaml
+# Version: 1.0 — 2026-04-18
+#
+# Routes:
+#   https://fintrack.local/api/  → fintrack-api:8000
+#   https://fintrack.local/      → fintrack-frontend:80
+#
+# TLS: self-signed cert for fintrack.local
+# NodePorts: HTTP 30280, HTTPS 32606
+# ============================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fintrack-ingress
+  namespace: fintrack
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-pass-headers: "X-Fintrack-Password"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - fintrack.local
+      secretName: fintrack-tls
+  rules:
+    - host: fintrack.local
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: fintrack-api
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fintrack-frontend
+                port:
+                  number: 80

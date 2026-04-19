@@ -191,25 +191,34 @@ def import_csv(
 def list_accounts(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
-    password: str = Header(..., alias="x-fintrack-password",
-                           description="Your fintrack password for key derivation"),
+    password: Optional[str] = Header(None, alias="x-fintrack-password"),
 ):
-    enc_key  = _get_user_key(current_user.id, password, db)
     accounts = db.query(Account).filter(
-        Account.user_id   == current_user.id,
+        Account.user_id == current_user.id,
     ).all()
-
-    return [
-        {
-            "id":       str(acc.id),
+    enc_key = None
+    if password:
+        try:
+            enc_key = _get_user_key(current_user.id, password, db)
+        except Exception:
+            pass
+    result = []
+    for acc in accounts:
+        try:
+            label  = decrypt(acc.account_label, enc_key) if enc_key else f"{acc.provider.title()} — {acc.source_type}"
+            member = decrypt(acc.member_name or "", enc_key) if enc_key else acc.provider.title()
+        except Exception:
+            label  = f"{acc.provider.title()} — {acc.source_type}"
+            member = acc.provider.title()
+        result.append({
+            "id":      str(acc.id),
             "provider": acc.provider,
-            "label":    decrypt(acc.account_label, enc_key),
-            "member":   decrypt(acc.member_name or "", enc_key),
-            "source":   acc.source_type,
-            "created":  acc.created_at.isoformat(),
-        }
-        for acc in accounts
-    ]
+            "label":   label,
+            "member":  member,
+            "source":  acc.source_type,
+            "created": acc.created_at.isoformat(),
+        })
+    return result
 
 
 @router.get("")

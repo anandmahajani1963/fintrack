@@ -50,10 +50,10 @@ export default function Sidebar({ active, onNavigate }) {
           className="w-full text-sm rounded-lg border border-gray-200
                      dark:border-gray-600 bg-gray-50 dark:bg-gray-800
                      text-gray-700 dark:text-gray-300 px-3 py-1.5 outline-none"
-          defaultValue={new Date().getFullYear()}
+          defaultValue={2026}
           onChange={e => onNavigate(active, parseInt(e.target.value))}
         >
-          {[2025, 2024, 2023].map(y => (
+          {[2026, 2025, 2024, 2023].map(y => (
             <option key={y} value={y}>{y}</option>
           ))}
         </select>

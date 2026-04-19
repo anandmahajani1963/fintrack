@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     KDF_HASH_LENGTH: int = 32
 
     # CORS
-    CORS_ORIGINS: str = '["http://192.168.1.171:3000","http://localhost:3000"]'
+    CORS_ORIGINS: str = '["http://192.168.1.171:3000","http://localhost:3000","https://fintrack.local","https://fintrack.local:32606"]'
 
     # AI (Phase 4 — optional for now)
     ANTHROPIC_API_KEY: str = ""

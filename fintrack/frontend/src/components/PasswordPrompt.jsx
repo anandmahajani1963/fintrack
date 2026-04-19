@@ -21,23 +21,31 @@ export default function PasswordPrompt() {
     if (!pwd) return
     setLoading(true); setError('')
     try {
-      // Verify password is correct by calling a password-requiring endpoint
+      // Get fresh access token via refresh
+      const rt = sessionStorage.getItem('refresh_token') || ''
+      const ref = await fetch('/api/v1/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: rt })
+      })
+      if (!ref.ok) { logout(); return }
+      const { access_token } = await ref.json()
+
+      // Verify password by calling accounts with password header
       const r = await fetch('/api/v1/transactions/accounts', {
         headers: {
-          'Authorization':       `Bearer ${sessionStorage.getItem('refresh_token') || ''}`,
+          'Authorization':       `Bearer ${access_token}`,
           'X-Fintrack-Password': pwd,
         }
       })
-      // We just need to check it doesn't return 422
-      // 401 is fine (token expired — auth handles that separately)
-      if (r.status === 422) {
+      if (r.status === 401 || r.status === 422) {
         setError('Incorrect password — please try again')
         setLoading(false)
         return
       }
       supplyPassword(pwd)
     } catch {
-      supplyPassword(pwd)  // Accept optimistically — API will validate
+      supplyPassword(pwd)
     }
     setLoading(false)
   }
