@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     SECRET_KEY:  str
 
     # Token expiry
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
     REFRESH_TOKEN_EXPIRE_DAYS:   int = 30
 
     # Key derivation (Argon2id)
