@@ -24,6 +24,7 @@ import Reconciliation from './pages/Reconciliation'
 import Import         from './pages/Import'
 import Budgets        from './pages/Budgets'
 import Export         from './pages/Export'
+import ResetPassword  from './pages/ResetPassword'
 
 const PAGES = {
   dashboard:      Dashboard,
@@ -48,6 +49,11 @@ function AppInner() {
   const [page, setPage]       = useState('dashboard')
   const [year, setYear]       = useState(2025)
   const [showRegister, setShowRegister] = useState(false)
+
+  // Show password reset page when URL contains /reset-password
+  if (window.location.pathname === '/reset-password') {
+    return <ResetPassword />
+  }
 
   // Show MFA setup if triggered after registration
   if (mfaSetupToken) {

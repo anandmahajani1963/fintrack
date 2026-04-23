@@ -350,3 +350,100 @@ def disable_mfa(
     db.commit()
 
     return {"status": "disabled", "message": "MFA has been disabled."}
+
+
+# ── MFA Recovery ──────────────────────────────────────────────────────────────
+
+class RecoveryRequest(BaseModel):
+    email: str
+
+class RecoveryVerify(BaseModel):
+    email: str
+    code:  str
+
+@router.post("/recover/send")
+def send_recovery_code(
+    body: RecoveryRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Send a recovery code to the user's email.
+    Called WITHOUT authentication — user has lost their MFA device.
+    Always returns 200 to prevent email enumeration.
+    """
+    from app.models.user import User
+    user = db.query(User).filter(
+        User.email     == body.email,
+        User.is_active == True,
+        User.mfa_enabled == True,
+    ).first()
+
+    if user:
+        code = _create_email_otp(user.id, 'recovery', db)
+        try:
+            _send_email(
+                to_email=user.email,
+                subject="fintrack — MFA Recovery Code",
+                body=f"""Your fintrack MFA recovery code is:
+
+  {code}
+
+This code expires in 10 minutes and can only be used once.
+
+After entering this code you will be required to set up
+MFA again before accessing your account.
+
+If you did not request this, your account may be at risk.
+Please contact support immediately.
+"""
+            )
+        except Exception as e:
+            logger.error(f"Recovery email failed: {e}")
+
+    # Always return 200 — never reveal if email exists
+    return {"message": "If that email has an account with MFA enabled, a recovery code has been sent."}
+
+
+@router.post("/recover/verify")
+def verify_recovery_code(
+    body: RecoveryVerify,
+    db: Session = Depends(get_db),
+):
+    """
+    Verify recovery code and return a temporary token.
+    MFA is disabled on the account — user must re-enroll immediately.
+    """
+    from app.models.user import User
+    from app.services.token import create_access_token, create_refresh_token
+
+    user = db.query(User).filter(
+        User.email     == body.email,
+        User.is_active == True,
+    ).first()
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired code.")
+
+    if not _verify_email_otp(user.id, body.code.strip(), 'recovery', db):
+        raise HTTPException(status_code=400, detail="Invalid or expired code.")
+
+    # Disable MFA — user must re-enroll after login
+    db.query(User).filter(User.id == user.id).update({
+        "mfa_enabled":  False,
+        "mfa_verified": False,
+        "mfa_type":     "none",
+        "totp_secret":  None,
+    })
+    db.commit()
+
+    logger.info(f"MFA recovery used for {user.email} — MFA disabled, re-enrollment required")
+
+    return {
+        "access_token":  create_access_token(str(user.id)),
+        "refresh_token": create_refresh_token(str(user.id)),
+        "email":         user.email,
+        "user_id":       str(user.id),
+        "mfa_required":  False,
+        "mfa_type":      "none",
+        "recovery":      True,   # signals frontend to force MFA re-enrollment
+    }

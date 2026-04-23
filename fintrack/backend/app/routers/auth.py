@@ -205,3 +205,130 @@ def get_me(current_user: CurrentUser):
         is_active  = current_user.is_active,
         created_at = current_user.created_at.isoformat(),
     )
+
+
+# ── Password Reset ────────────────────────────────────────────────────────────
+
+import secrets as _secrets
+from pydantic import BaseModel as _BaseModel
+from pydantic import EmailStr as _EmailStr
+from app.models.user import User as _User
+
+class ForgotPasswordRequest(_BaseModel):
+    email: _EmailStr
+
+class ResetPasswordRequest(_BaseModel):
+    token:    str
+    password: str
+
+@router.post("/forgot-password")
+def forgot_password(
+    body: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Send password reset email. Always returns 200 to prevent
+    email enumeration attacks.
+    """
+    user = db.query(_User).filter(
+        _User.email     == body.email,
+        _User.is_active == True,
+    ).first()
+
+    if user:
+        # Invalidate any existing unused tokens
+        db.execute(text("""
+            UPDATE password_reset_tokens
+            SET used = true
+            WHERE user_id = :uid AND used = false
+        """), {"uid": str(user.id)})
+
+        # Create new token
+        token = _secrets.token_urlsafe(32)
+        db.execute(text("""
+            INSERT INTO password_reset_tokens (user_id, token)
+            VALUES (:uid, :token)
+        """), {"uid": str(user.id), "token": token})
+        db.commit()
+
+        # Send email
+        try:
+            from app.config import settings
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+
+            reset_url = f"https://fintrack.local:32606/reset-password?token={token}"
+
+            msg = MIMEMultipart()
+            msg['From']    = settings.SMTP_FROM
+            msg['To']      = user.email
+            msg['Subject'] = "fintrack — Password Reset"
+            msg.attach(MIMEText(f"""
+You requested a password reset for your fintrack account.
+
+Click this link to reset your password (expires in 30 minutes):
+
+  {reset_url}
+
+If you did not request this, please ignore this email.
+Your password will not be changed.
+""", 'plain'))
+
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+                server.starttls()
+                server.login(settings.SMTP_USER, settings.SMTP_PASS)
+                server.send_message(msg)
+        except Exception as e:
+            logger.error(f"Reset email failed: {e}")
+
+    return {"message": "If that email has an account, a password reset link has been sent."}
+
+
+@router.post("/reset-password")
+def reset_password(
+    body: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """Verify reset token and update password."""
+    from datetime import timezone as _tz
+    from app.services.encryption import hash_password
+
+    # Find valid token
+    row = db.execute(text("""
+        SELECT user_id, expires_at, used
+        FROM password_reset_tokens
+        WHERE token = :token AND used = false
+        LIMIT 1
+    """), {"token": body.token}).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link.")
+
+    if datetime.now(timezone.utc) > row.expires_at.replace(tzinfo=timezone.utc):
+        raise HTTPException(status_code=400, detail="Reset link has expired. Please request a new one.")
+
+    # Validate new password
+    if len(body.password) < 10:
+        raise HTTPException(status_code=422, detail="Password must be at least 10 characters.")
+    if not any(c.isupper() for c in body.password):
+        raise HTTPException(status_code=422, detail="Password must contain an uppercase letter.")
+    if not any(c.isdigit() for c in body.password):
+        raise HTTPException(status_code=422, detail="Password must contain a number.")
+
+    # Update password
+    db.execute(text("""
+        UPDATE users SET password_hash = :hash
+        WHERE id = :uid
+    """), {"hash": hash_password(body.password), "uid": str(row.user_id)})
+
+    # Mark token as used
+    db.execute(text("""
+        UPDATE password_reset_tokens SET used = true
+        WHERE token = :token
+    """), {"token": body.token})
+
+    db.commit()
+    logger.info(f"Password reset for user {row.user_id}")
+
+    return {"message": "Password updated successfully. You can now log in."}

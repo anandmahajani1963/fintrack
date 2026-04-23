@@ -13,11 +13,16 @@ import { useAuth } from '../context/AuthContext'
 import { TrendingUp, Lock, Mail } from 'lucide-react'
 
 export default function Login({ onRegister }) {
-  const { login, completeMFALogin } = useAuth()
+  const { login, completeMFALogin, startMFASetup } = useAuth()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [mfaCode, setMfaCode]   = useState('')
-  const [step, setStep]         = useState('login')  // login | mfa
+  const [recoverEmail, setRecoverEmail]       = useState('')
+  const [recoverCode, setRecoverCode]         = useState('')
+  const [recoverPassword, setRecoverPassword] = useState('')
+  const [forgotEmail, setForgotEmail]         = useState('')
+  const [forgotSent, setForgotSent]           = useState(false)
+  const [step, setStep]         = useState('login')  // login | mfa | recover | recover_verify | forgot
   const [mfaType, setMfaType]   = useState('')
   const [pendingToken, setPendingToken] = useState('')
   const [error, setError]       = useState('')
@@ -90,7 +95,54 @@ export default function Login({ onRegister }) {
     setLoading(false)
   }
 
-  return (
+  async function handleForgotPassword(e) {
+    e.preventDefault()
+    setError(''); setLoading(true)
+    try {
+      await fetch('/api/v1/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail })
+      })
+      setForgotSent(true)
+      setError('')
+    } catch { setError('Failed to send reset email') }
+    setLoading(false)
+  }
+
+  async function handleRecoverSend(e) {
+    e.preventDefault()
+    setError(''); setLoading(true)
+    try {
+      await fetch('/api/v1/mfa/recover/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: recoverEmail })
+      })
+      setStep('recover_verify')
+      setError('If that account exists, a recovery code has been sent.')
+    } catch { setError('Failed to send recovery code') }
+    setLoading(false)
+  }
+
+  async function handleRecoverVerify(e) {
+    e.preventDefault()
+    setError(''); setLoading(true)
+    try {
+      const r = await fetch('/api/v1/mfa/recover/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: recoverEmail, code: recoverCode.trim() })
+      })
+      const data = await r.json()
+      if (!r.ok) throw new Error(data.detail || 'Invalid code')
+      sessionStorage.setItem('refresh_token', data.refresh_token)
+      startMFASetup(data.access_token, data.email, recoverPassword)
+    } catch (err) { setError(err.message) }
+    setLoading(false)
+  }
+
+    return (
     <div className="min-h-screen flex items-center justify-center
                     bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-sm">
@@ -161,11 +213,17 @@ export default function Login({ onRegister }) {
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
 
-              <div className="text-center pt-1">
+              <div className="text-center pt-1 space-y-2">
                 <button type="button" onClick={onRegister}
                         className="text-sm text-blue-600 dark:text-blue-400
-                                   hover:underline">
+                                   hover:underline block w-full">
                   Create an account
+                </button>
+                <button type="button"
+                        onClick={() => { setStep('forgot'); setForgotEmail(email); setError('') }}
+                        className="text-sm text-gray-400 hover:text-gray-600
+                                   dark:hover:text-gray-200 hover:underline">
+                  Forgot password?
                 </button>
               </div>
             </form>
@@ -217,9 +275,159 @@ export default function Login({ onRegister }) {
               )}
 
               <button type="button"
+                      onClick={() => {
+                        setRecoverEmail(email)
+                        setStep('recover')
+                        setError('')
+                      }}
+                      className="w-full py-2 text-sm text-blue-500 hover:text-blue-700">
+                Lost access to your authenticator?
+              </button>
+              <button type="button"
                       onClick={() => { setStep('login'); setMfaCode(''); setError('') }}
                       className="w-full py-2 text-sm text-gray-400 hover:text-gray-600">
                 ← Back to sign in
+              </button>
+            </form>
+          )}
+
+          {/* Step: Forgot password */}
+          {step === 'forgot' && (
+            <div className="space-y-4">
+              {!forgotSent ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Enter your email and we will send you a password reset link.
+                  </p>
+                  <input
+                    type="email" required
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300
+                               dark:border-gray-600 bg-white dark:bg-gray-700
+                               text-gray-900 dark:text-white focus:ring-2
+                               focus:ring-blue-500 outline-none text-sm"
+                  />
+                  {error && (
+                    <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20
+                                  rounded-lg px-3 py-2">{error}</p>
+                  )}
+                  <button type="submit" disabled={loading}
+                          className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700
+                                     disabled:opacity-50 text-white font-medium text-sm">
+                    {loading ? 'Sending…' : 'Send reset link'}
+                  </button>
+                  <button type="button"
+                          onClick={() => { setStep('login'); setError('') }}
+                          className="w-full py-2 text-sm text-gray-400 hover:text-gray-600">
+                    ← Back to sign in
+                  </button>
+                </form>
+              ) : (
+                <div className="text-center space-y-4">
+                  <p className="text-4xl">📧</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    Check your email
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    If an account exists for <strong>{forgotEmail}</strong>,
+                    a reset link has been sent. Check your inbox.
+                  </p>
+                  <button type="button"
+                          onClick={() => { setStep('login'); setForgotSent(false); setError('') }}
+                          className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700
+                                     text-white font-medium text-sm">
+                    Back to sign in
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step: Recovery — request code */}
+          {step === 'recover' && (
+            <form onSubmit={handleRecoverSend} className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                Enter your email address and we will send a one-time recovery code.
+                You will need to set up MFA again after recovery.
+              </p>
+              <input
+                type="email"
+                required
+                value={recoverEmail}
+                onChange={e => setRecoverEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300
+                           dark:border-gray-600 bg-white dark:bg-gray-700
+                           text-gray-900 dark:text-white focus:ring-2
+                           focus:ring-blue-500 outline-none text-sm"
+              />
+              {error && (
+                <p className={`text-sm rounded-lg px-3 py-2
+                  ${error.includes('sent')
+                    ? 'text-green-600 bg-green-50 dark:bg-green-900/20'
+                    : 'text-red-600 bg-red-50 dark:bg-red-900/20'}`}>
+                  {error}
+                </p>
+              )}
+              <button type="submit" disabled={loading}
+                      className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700
+                                 disabled:opacity-50 text-white font-medium text-sm">
+                {loading ? 'Sending…' : 'Send recovery code'}
+              </button>
+              <button type="button"
+                      onClick={() => { setStep('mfa'); setError('') }}
+                      className="w-full py-2 text-sm text-gray-400 hover:text-gray-600">
+                ← Back
+              </button>
+            </form>
+          )}
+
+          {/* Step: Recovery — verify code */}
+          {step === 'recover_verify' && (
+            <form onSubmit={handleRecoverVerify} className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                Enter the 6-digit recovery code sent to <strong>{recoverEmail}</strong>.
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                autoFocus
+                value={recoverCode}
+                onChange={e => setRecoverCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300
+                           dark:border-gray-600 bg-white dark:bg-gray-700
+                           text-gray-900 dark:text-white text-center text-xl
+                           tracking-widest font-mono focus:ring-2
+                           focus:ring-blue-500 outline-none"
+              />
+              <input
+                type="password"
+                required
+                value={recoverPassword}
+                onChange={e => setRecoverPassword(e.target.value)}
+                placeholder="Your fintrack password"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300
+                           dark:border-gray-600 bg-white dark:bg-gray-700
+                           text-gray-900 dark:text-white focus:ring-2
+                           focus:ring-blue-500 outline-none text-sm"
+              />
+              {error && (
+                <p className="text-sm text-red-600 dark:text-red-400 bg-red-50
+                              dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</p>
+              )}
+              <button type="submit" disabled={loading || recoverCode.length !== 6}
+                      className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700
+                                 disabled:opacity-50 text-white font-medium text-sm">
+                {loading ? 'Verifying…' : 'Verify and recover account'}
+              </button>
+              <button type="button"
+                      onClick={() => handleRecoverSend({ preventDefault: () => {} })}
+                      className="w-full py-2 text-sm text-gray-400 hover:text-gray-600">
+                Resend code
               </button>
             </form>
           )}
