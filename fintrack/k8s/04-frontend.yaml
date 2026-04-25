@@ -42,8 +42,8 @@ spec:
 
       containers:
         - name: frontend
-          image: frontend-frontend:latest
-          imagePullPolicy: Never
+          image: 192.168.1.169:5000/fintrack-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           livenessProbe:
@@ -60,10 +60,10 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              memory: "64Mi"
+              memory: "96Mi"
               cpu: "100m"
             limits:
-              memory: "128Mi"
+              memory: "192Mi"
               cpu: "200m"
 ---
 apiVersion: v1
