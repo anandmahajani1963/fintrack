@@ -76,21 +76,7 @@ def _get_or_create_account(
     db.add(acc)
     db.flush()
     return acc
-        except Exception:
-            continue
 
-    label = f"{provider.title()} — {member_name}"
-    acc = Account(
-        user_id       = user_id,
-        provider      = provider,
-        account_label = encrypt(label, encryption_key),
-        member_name   = encrypt(member_name, encryption_key),
-        last_four     = encrypt("", encryption_key),
-        source_type   = "csv_import",
-    )
-    db.add(acc)
-    db.flush()
-    return acc
 
 
 @router.post("/import", status_code=status.HTTP_201_CREATED)
