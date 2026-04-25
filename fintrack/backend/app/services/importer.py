@@ -35,34 +35,66 @@ logger = logging.getLogger("fintrack.importer")
 # ── Per-provider column aliases ───────────────────────────────────────────────
 # Ordered by preference — first match wins.
 # Add new aliases here when a new format is encountered.
+# ── CSV format configurations ────────────────────────────────────────────────
+# Three generic formats cover virtually all US credit card and bank CSV exports.
+# Users select format by pattern, not by provider name.
+#
+# Format A (debit_credit): Separate Debit and Credit columns, positive numbers.
+#   Providers: Citi, AmEx, Discover, Capital One credit cards
+#
+# Format B (amount_negative): Single Amount column, purchases are negative.
+#   Providers: Chase, Bank of America, Wells Fargo, most checking accounts
+#
+# Format C (amount_positive): Single Amount column, purchases are positive.
+#   Providers: Some older bank exports, regional banks
+#
+# Legacy aliases: "citi" → debit_credit, "amex" → debit_credit, "chase" → amount_negative
+
 CARD_CONFIGS = {
-    "citi": {
+    # ── Format A: Separate Debit/Credit columns ──────────────────────────────
+    "debit_credit": {
         "flip_sign":   False,
         "member_cols": ["Account Number", "Card Member", "Cardholder", "Name", "Account"],
         "date_cols":   ["Date", "Transaction Date", "Posted Date", "Trans Date",
-                        "Post Date", "Activity Date"],
+                        "Post Date", "Activity Date", "Posting Date"],
         "desc_cols":   ["Description", "Merchant", "Payee", "Transaction Description",
-                        "Memo"],
-        "amount_cols": ["Debit", "Amount", "Credit", "Charge Amount", "Debit Amount"],
-        "credit_cols": ["Credit"],          # separate credit column if present
+                        "Memo", "Narrative"],
+        "amount_cols": ["Debit", "Amount", "Charge Amount", "Debit Amount", "Withdrawals"],
+        "credit_cols": ["Credit", "Credit Amount", "Payments", "Deposits"],
     },
-    "amex": {
-        "flip_sign":   False,
-        "member_cols": ["Card Member", "Account Number", "Cardholder", "Name"],
-        "date_cols":   ["Date", "Transaction Date", "Posted Date", "Trans Date"],
-        "desc_cols":   ["Description", "Merchant", "Payee", "Transaction Description"],
-        "amount_cols": ["Amount", "Debit", "Credit", "Charge Amount"],
-        "credit_cols": [],
-    },
-    "chase": {
+    # ── Format B: Single Amount column, negative = purchase ──────────────────
+    "amount_negative": {
         "flip_sign":   True,
-        "member_cols": [],
-        "date_cols":   ["Transaction Date", "Date", "Post Date", "Trans Date"],
-        "desc_cols":   ["Description", "Merchant Name", "Payee", "Memo"],
-        "amount_cols": ["Amount", "Debit", "Charge Amount"],
+        "member_cols": ["Account Number", "Card Member", "Cardholder", "Name"],
+        "date_cols":   ["Transaction Date", "Date", "Post Date", "Trans Date",
+                        "Posting Date", "Activity Date"],
+        "desc_cols":   ["Description", "Merchant Name", "Payee", "Memo",
+                        "Transaction Description", "Narrative"],
+        "amount_cols": ["Amount", "Debit", "Charge Amount", "Transaction Amount"],
         "credit_cols": [],
     },
+    # ── Format C: Single Amount column, positive = purchase ──────────────────
+    "amount_positive": {
+        "flip_sign":   False,
+        "member_cols": ["Account Number", "Card Member", "Cardholder", "Name"],
+        "date_cols":   ["Date", "Transaction Date", "Post Date", "Trans Date",
+                        "Posting Date", "Activity Date"],
+        "desc_cols":   ["Description", "Merchant", "Payee", "Memo",
+                        "Transaction Description", "Narrative"],
+        "amount_cols": ["Amount", "Debit", "Charge Amount", "Withdrawals",
+                        "Transaction Amount"],
+        "credit_cols": [],
+    },
+    # ── Legacy aliases (backward compatibility) ───────────────────────────────
+    "citi":  None,   # resolved below
+    "amex":  None,
+    "chase": None,
 }
+
+# Resolve legacy aliases
+CARD_CONFIGS["citi"]  = CARD_CONFIGS["debit_credit"]
+CARD_CONFIGS["amex"]  = CARD_CONFIGS["debit_credit"]
+CARD_CONFIGS["chase"] = CARD_CONFIGS["amount_negative"]
 
 # Date formats to try — order matters (most specific first)
 DATE_FORMATS = [
@@ -222,8 +254,13 @@ def parse_csv(
         skipped_count=0,
     )
 
+    # Resolve provider to config (supports both new format names and legacy aliases)
     if provider not in CARD_CONFIGS:
-        result.errors.append(f"Unknown provider '{provider}'. Use: citi, amex, chase")
+        result.errors.append(
+            f"Unknown format '{provider}'. "
+            f"Use: debit_credit, amount_negative, amount_positive "
+            f"(or legacy: citi, amex, chase)"
+        )
         return result
 
     cfg = CARD_CONFIGS[provider]

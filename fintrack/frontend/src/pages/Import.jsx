@@ -12,7 +12,30 @@ import { Upload, CheckCircle, AlertCircle, FileText, X } from 'lucide-react'
 
 //const API_BASE = import.meta.env.VITE_API_BASE || 'http://192.168.1.170:8000'
 const API_BASE = ''
-const PROVIDERS = ['citi', 'amex', 'chase']
+// CSV format options — covers all major US credit cards and banks
+const FORMATS = [
+  {
+    value: 'debit_credit',
+    label: 'Debit/Credit columns',
+    desc:  'Citi, AmEx, Discover, Capital One',
+    hint:  'Separate Debit and Credit columns',
+    auto:  ['citi', 'amex', 'discover', 'capital'],
+  },
+  {
+    value: 'amount_negative',
+    label: 'Amount column (negative charges)',
+    desc:  'Chase, Bank of America, Wells Fargo, checking accounts',
+    hint:  'Single Amount column — purchases are negative',
+    auto:  ['chase', 'boa', 'bofa', 'bank_of_america', 'wellsfargo', 'wf_'],
+  },
+  {
+    value: 'amount_positive',
+    label: 'Amount column (positive charges)',
+    desc:  'Some regional banks and older exports',
+    hint:  'Single Amount column — purchases are positive',
+    auto:  [],
+  },
+]
 
 export default function Import() {
   const { password } = useAuth()
@@ -22,10 +45,10 @@ export default function Import() {
 
   function addFiles(fileList) {
     const newFiles = Array.from(fileList).map(file => {
-      // Auto-detect provider from filename
+      // Auto-detect format from filename
       const name = file.name.toLowerCase()
-      const provider = PROVIDERS.find(p => name.startsWith(p)) || ''
-      return { file, provider, status: 'pending', result: null, error: null }
+      const fmt = FORMATS.find(f => f.auto.some(a => name.includes(a)))
+      return { file, provider: fmt?.value || '', providerName: '', status: 'pending', result: null, error: null }
     })
     setFiles(prev => [...prev, ...newFiles])
   }
@@ -36,6 +59,9 @@ export default function Import() {
 
   function updateProvider(idx, provider) {
     setFiles(prev => prev.map((f, i) => i === idx ? { ...f, provider } : f))
+  }
+  function updateProviderName(idx, name) {
+    setFiles(prev => prev.map((f, i) => i === idx ? { ...f, providerName: name } : f))
   }
 
   async function importAll() {
@@ -55,7 +81,7 @@ export default function Import() {
       if (f.status === 'success') continue
       if (!f.provider) {
         setFiles(prev => prev.map((x, j) => j === i
-          ? { ...x, status: 'error', error: 'Select a provider' } : x))
+          ? { ...x, status: 'error', error: 'Select a CSV format' } : x))
         continue
       }
 
@@ -155,9 +181,28 @@ export default function Import() {
                                bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300
                                px-2 py-1.5 outline-none"
                   >
-                    <option value="">Select provider…</option>
-                    {PROVIDERS.map(p => <option key={p} value={p}>{p.toUpperCase()}</option>)}
+                    <option value="">Select CSV format…</option>
+                    {FORMATS.map(fmt => (
+                      <option key={fmt.value} value={fmt.value}>
+                        {fmt.label} — {fmt.desc}
+                      </option>
+                    ))}
                   </select>
+                )}
+
+                {/* Optional provider name */}
+                {f.provider && (
+                  <input
+                    type="text"
+                    placeholder="Card nickname (optional, e.g. Citi Costco, BofA Checking)"
+                    value={f.providerName || ''}
+                    onChange={e => updateProviderName(i, e.target.value)}
+                    className="text-xs rounded-lg border border-gray-200
+                               dark:border-gray-600 bg-white dark:bg-gray-800
+                               text-gray-700 dark:text-gray-300 px-2 py-1.5
+                               outline-none w-full max-w-xs
+                               focus:ring-1 focus:ring-blue-500"
+                  />
                 )}
 
                 {/* Status */}
@@ -234,7 +279,10 @@ export default function Import() {
       <Card>
         <SectionTitle>File Naming Convention</SectionTitle>
         <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <p>Name your files with the provider prefix for automatic detection:</p>
+          <p>Name your files with a recognizable prefix for automatic format detection:</p>
+          <p className="text-xs text-gray-400 mt-1">
+            citi_, amex_, discover_, chase_, boa_, wellsfargo_ → auto-detected
+          </p>
           <div className="mt-2 space-y-1 font-mono text-xs bg-gray-50 dark:bg-gray-700/30
                           rounded-lg p-3">
             <p><span className="text-blue-600">citi_</span>john_2025.csv</p>

@@ -91,10 +91,12 @@ def import_csv(
     password: str        = Form(..., description="Your fintrack password"),
 ):
     provider = provider.lower().strip()
-    if provider not in ("citi", "amex", "chase"):
+    VALID_FORMATS = ("debit_credit", "amount_negative", "amount_positive",
+                     "citi", "amex", "chase")
+    if provider not in VALID_FORMATS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="provider must be one of: citi, amex, chase",
+            detail="provider must be one of: debit_credit, amount_negative, amount_positive",
         )
 
     file_bytes = file.file.read()
