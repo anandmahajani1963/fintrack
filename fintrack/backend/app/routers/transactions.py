@@ -55,16 +55,27 @@ def _get_or_create_account(
     user_id, provider: str, member_name: str,
     encryption_key: bytes, db: Session
 ) -> Account:
-    accounts = db.query(Account).filter(
-        Account.user_id   == user_id,
-        Account.provider  == provider,
-    ).all()
-
-    for acc in accounts:
-        try:
-            dec_member = decrypt(acc.member_name or "", encryption_key)
-            if dec_member == member_name:
-                return acc
+    # Use member_name_plain for reliable lookup — no decryption needed
+    acc = db.query(Account).filter(
+        Account.user_id           == user_id,
+        Account.provider          == provider,
+        Account.member_name_plain == member_name,
+    ).first()
+    if acc:
+        return acc
+    label = f"{provider.title()} — {member_name}"
+    acc = Account(
+        user_id           = user_id,
+        provider          = provider,
+        account_label     = encrypt(label, encryption_key),
+        member_name       = encrypt(member_name, encryption_key),
+        member_name_plain = member_name,
+        last_four         = encrypt("", encryption_key),
+        source_type       = "csv_import",
+    )
+    db.add(acc)
+    db.flush()
+    return acc
         except Exception:
             continue
 
@@ -87,10 +98,13 @@ def import_csv(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
     file:     UploadFile = File(...),
-    provider: str        = Form(..., description="citi, amex, or chase"),
-    password: str        = Form(..., description="Your fintrack password"),
+    provider:      str = Form(..., description="CSV format: debit_credit, amount_negative, amount_positive"),
+    provider_name: str = Form("", description="Optional card nickname e.g. Citi Costco, BofA Checking"),
+    password:      str = Form(..., description="Your fintrack password"),
 ):
     provider = provider.lower().strip()
+    # Use nickname as the stored provider label if provided
+    account_provider = provider_name.strip() if provider_name.strip() else provider
     VALID_FORMATS = ("debit_credit", "amount_negative", "amount_positive",
                      "citi", "amex", "chase")
     if provider not in VALID_FORMATS:
@@ -130,7 +144,7 @@ def import_csv(
     for row in result.rows:
         if row.member_name not in accounts_cache:
             accounts_cache[row.member_name] = _get_or_create_account(
-                current_user.id, provider, row.member_name, enc_key, db
+                current_user.id, account_provider, row.member_name, enc_key, db
             )
         account = accounts_cache[row.member_name]
 
@@ -178,9 +192,10 @@ def import_csv(
     )
 
     return {
-        "status":     "success",
-        "file":       file.filename,
-        "provider":   provider,
+        "status":        "success",
+        "file":          file.filename,
+        "provider":      provider,
+        "account_label": account_provider,
         "raw_rows":   result.raw_row_count,
         "imported":   inserted,
         "skipped":    result.skipped_count,

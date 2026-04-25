@@ -90,6 +90,7 @@ export default function Import() {
       const formData = new FormData()
       formData.append('file', f.file)
       formData.append('provider', f.provider)
+      formData.append('provider_name', f.providerName || '')
       formData.append('password', password)
 
       try {
