@@ -41,12 +41,10 @@ def _get_user_key(user_id, password: str, db: Session) -> bytes:
     if not user_key:
         raise HTTPException(status_code=500, detail="Encryption key material not found")
     key = derive_key(password, bytes(user_key.kdf_salt))
-    # Validate password by verifying key_check sentinel
+    # Validate password using key_check sentinel
     if user_key.key_check:
-        try:
-            from app.services.encryption import decrypt
-            decrypt(bytes(user_key.key_check), key)
-        except Exception:
+        from app.services.encryption import verify_key
+        if not verify_key(key, bytes(user_key.key_check)):
             raise HTTPException(status_code=401, detail="Incorrect password")
     return key
 
