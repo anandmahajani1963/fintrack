@@ -40,7 +40,15 @@ def _get_user_key(user_id, password: str, db: Session) -> bytes:
     user_key = db.query(UserKey).filter(UserKey.user_id == user_id).first()
     if not user_key:
         raise HTTPException(status_code=500, detail="Encryption key material not found")
-    return derive_key(password, bytes(user_key.kdf_salt))
+    key = derive_key(password, bytes(user_key.kdf_salt))
+    # Validate password by verifying key_check sentinel
+    if user_key.key_check:
+        try:
+            from app.services.encryption import decrypt
+            decrypt(bytes(user_key.key_check), key)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Incorrect password")
+    return key
 
 
 def _get_thresholds(user_id, db: Session) -> dict:
@@ -274,34 +282,6 @@ def list_transactions(
             for t in rows
         ],
     }
-
-
-
-# ── List all categories (for dropdowns) ───────────────────────────────────────
-
-@router.get("/categories")
-def list_categories(
-    current_user: CurrentUser,
-    db: Session = Depends(get_db),
-):
-    """
-    Return all categories defined for this user regardless of whether
-    they have any transactions. Used for dropdowns in the UI.
-    Version: 1.0 — 2026-04-01
-    """
-    cats = db.query(Category).filter(
-        Category.user_id == current_user.id
-    ).order_by(Category.sort_order, Category.name).all()
-    return [
-        {
-            "name":        c.name,
-            "subcategory": c.subcategory or c.name,
-            "is_essential":c.is_essential,
-            "color_code":  c.color_code,
-        }
-        for c in cats
-    ]
-
 
 
 
