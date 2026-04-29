@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
   const [needsPassword, setNeedsPassword] = useState(false)
   // MFA setup state — set after registration
   const [mfaSetupToken, setMfaSetupToken] = useState(null)
+  const [plan, setPlan]               = useState('household')
 
   useEffect(() => {
     auth.tryRestoreSession().then(restored => {
@@ -44,6 +45,7 @@ export function AuthProvider({ children }) {
     }
     setUser({ id: data.user_id, email: data.email })
     setPassword(pwd)
+    setPlan(data.plan || 'household')
     setNeedsPassword(false)
     return data
   }, [])
@@ -51,6 +53,7 @@ export function AuthProvider({ children }) {
   const completeMFALogin = useCallback((email, pwd, userData) => {
     setUser({ id: userData.user_id, email })
     setPassword(pwd)
+    setPlan(userData.plan || 'household')
     setNeedsPassword(false)
   }, [])
 
@@ -77,6 +80,7 @@ export function AuthProvider({ children }) {
     auth.logout()
     setUser(null)
     setPassword('')
+    setPlan('household')
     setNeedsPassword(false)
     setMfaSetupToken(null)
   }, [])
@@ -93,7 +97,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, password, login, logout,
+      user, password, plan, login, logout,
       isLoggedIn: !!user,
       needsPassword, supplyPassword,
       mfaSetupToken, startMFASetup, completeMFASetup,

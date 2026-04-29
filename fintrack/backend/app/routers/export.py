@@ -38,7 +38,7 @@ from reportlab.platypus import (
 
 from app.database import get_db
 from app.models.user import UserKey
-from app.services.auth import CurrentUser
+from app.services.auth import CurrentUser, require_plan
 from app.services.encryption import decrypt, derive_key
 
 logger = logging.getLogger("fintrack.export")
@@ -539,6 +539,7 @@ def export_excel(
 ):
     """Download Excel workbook with 4 sheets: Summary, Monthly Pivot,
     Transactions, Categories."""
+    require_plan(current_user, "export")
     enc_key  = _get_enc_key(current_user.id, password, db)
     filename = f"fintrack_{year or 'all'}.xlsx"
     data     = build_excel(current_user.id, year, enc_key, db)
@@ -557,6 +558,7 @@ def export_pdf(
     password: str = Header(..., alias="x-fintrack-password"),
 ):
     """Download PDF report with summary, categories, pivot, and transactions."""
+    require_plan(current_user, "export")
     enc_key  = _get_enc_key(current_user.id, password, db)
     filename = f"fintrack_{year or 'all'}.pdf"
     data     = build_pdf(current_user.id, year, enc_key, db)

@@ -27,7 +27,7 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar({ active, onNavigate }) {
-  const { user, logout } = useAuth()
+  const { user, logout, plan } = useAuth()
 
   return (
     <aside className="w-56 flex-shrink-0 flex flex-col
@@ -81,9 +81,15 @@ export default function Sidebar({ active, onNavigate }) {
       </nav>
 
       <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
           {user?.email}
         </p>
+        <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full mb-2 mt-1
+          ${plan === 'premium'  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+            plan === 'household' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                   'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
+          {plan === 'premium' ? '⭐ Premium' : plan === 'household' ? '🏠 Household' : '🆓 Free'}
+        </span>
         <button
           onClick={logout}
           className="flex items-center gap-2 text-sm text-gray-500

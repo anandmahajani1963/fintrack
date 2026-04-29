@@ -26,7 +26,9 @@ class User(Base):
     id            = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email         = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(Text, nullable=False)
-    is_active     = Column(Boolean, nullable=False, default=True)
+    is_active      = Column(Boolean, nullable=False, default=True)
+    plan           = Column(String, nullable=False, default='household')
+    plan_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     # MFA fields
     mfa_type      = Column(String, nullable=False, default='none')
@@ -75,7 +77,9 @@ class Account(Base):
     member_name        = Column(Text, nullable=True)
     member_name_plain  = Column(String, nullable=True)
     last_four     = Column(String, nullable=True)
-    is_active     = Column(Boolean, nullable=False, default=True)
+    is_active      = Column(Boolean, nullable=False, default=True)
+    plan           = Column(String, nullable=False, default='household')
+    plan_expires_at = Column(DateTime(timezone=True), nullable=True)
     source_type   = Column(String, nullable=False, default='csv_import')
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
 

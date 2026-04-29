@@ -84,6 +84,11 @@ export default function Import() {
           ? { ...x, status: 'error', error: 'Select a CSV format' } : x))
         continue
       }
+      if (!f.providerName || !f.providerName.trim()) {
+        setFiles(prev => prev.map((x, j) => j === i
+          ? { ...x, status: 'error', error: 'Enter a card nickname (e.g. Citi Shared, Chase Joint)' } : x))
+        continue
+      }
 
       setFiles(prev => prev.map((x, j) => j === i ? { ...x, status: 'importing' } : x))
 

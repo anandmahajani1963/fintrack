@@ -67,7 +67,7 @@ CARD_CONFIGS = {
         "flip_sign":   True,
         "member_cols": ["Account Number", "Card Member", "Cardholder", "Name"],
         "date_cols":   ["Transaction Date", "Date", "Post Date", "Trans Date",
-                        "Posting Date", "Activity Date"],
+                        "Posting Date", "Activity Date", "Posted Date"],
         "desc_cols":   ["Description", "Merchant Name", "Payee", "Memo",
                         "Transaction Description", "Narrative"],
         "amount_cols": ["Amount", "Debit", "Charge Amount", "Transaction Amount"],
