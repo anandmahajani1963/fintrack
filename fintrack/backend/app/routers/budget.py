@@ -64,6 +64,7 @@ def get_thresholds(
 
 @router.put("/thresholds", status_code=200)
 def upsert_threshold(
+    require_plan(current_user, "budgets")
     body: ThresholdUpsert,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
@@ -108,6 +109,7 @@ def upsert_threshold(
 
 @router.delete("/thresholds/{threshold_id}", status_code=200)
 def delete_threshold(
+    require_plan(current_user, "budgets")
     threshold_id: str,
     current_user: CurrentUser,
     db: Session = Depends(get_db),

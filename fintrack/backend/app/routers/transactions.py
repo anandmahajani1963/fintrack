@@ -114,6 +114,24 @@ def import_csv(
     except Exception:
         raise HTTPException(status_code=401, detail="Password incorrect")
 
+    # Free tier: max 1 account
+    from app.services.auth import get_plan_features
+    features = get_plan_features(getattr(current_user, 'plan', 'household'))
+    if features['max_accounts'] is not None:
+        existing_accounts = db.query(Account).filter(
+            Account.user_id == current_user.id
+        ).count()
+        if existing_accounts >= features['max_accounts']:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "plan_required",
+                    "feature": "accounts",
+                    "current_plan": getattr(current_user, 'plan', 'free'),
+                    "message": "Free plan allows 1 card. Upgrade to Household to import unlimited cards.",
+                }
+            )
+
     user_categories = get_user_categories(current_user.id, db)
     thresholds      = _get_thresholds(current_user.id, db)
 
