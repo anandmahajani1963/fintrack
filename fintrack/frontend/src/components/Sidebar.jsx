@@ -8,8 +8,8 @@
 import React from 'react'
 import {
   LayoutDashboard, PieChart, CalendarDays,
-  List, Zap, LogOut, TrendingUp, Users,
-  ClipboardCheck, Upload, DollarSign, Download
+  List, LogOut, TrendingUp, Users,
+  ClipboardCheck, Upload, DollarSign, Download, Zap
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { id: 'reconciliation', label: 'Reconciliation', icon: ClipboardCheck  },
   { id: 'import',         label: 'Import Data',    icon: Upload          },
   { id: 'export',         label: 'Export',         icon: Download        },
+  { id: 'upgrade',        label: 'Upgrade Plan',   icon: Zap             },
 ]
 
 export default function Sidebar({ active, onNavigate }) {

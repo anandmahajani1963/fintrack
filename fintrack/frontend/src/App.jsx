@@ -26,6 +26,7 @@ import Import         from './pages/Import'
 import Budgets        from './pages/Budgets'
 import Export         from './pages/Export'
 import ResetPassword  from './pages/ResetPassword'
+import Upgrade        from './pages/Upgrade'
 
 const PAGES = {
   dashboard:      Dashboard,
@@ -35,6 +36,7 @@ const PAGES = {
   utilities:      Utilities,
   members:        Members,
   reconciliation: Reconciliation,
+  upgrade:         Upgrade,
   import:         Import,
   budgets:        Budgets,
   export:         Export,
@@ -52,6 +54,13 @@ function AppInner() {
   const [showRegister, setShowRegister] = useState(false)
 
   const { showWarn, countdown, stayLoggedIn } = useSessionTimeout(isLoggedIn, logout)
+
+  // Allow any component to navigate via CustomEvent
+  React.useEffect(() => {
+    const handler = (e) => setPage(e.detail)
+    window.addEventListener('navigate', handler)
+    return () => window.removeEventListener('navigate', handler)
+  }, [])
 
   // Show password reset page when URL contains /reset-password
   if (window.location.pathname === '/reset-password') {

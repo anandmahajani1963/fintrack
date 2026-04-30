@@ -64,11 +64,11 @@ def get_thresholds(
 
 @router.put("/thresholds", status_code=200)
 def upsert_threshold(
-    require_plan(current_user, "budgets")
     body: ThresholdUpsert,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
+    require_plan(current_user, "budgets")
     if body.period not in ('monthly', 'annual'):
         raise HTTPException(status_code=422, detail="period must be 'monthly' or 'annual'")
     if body.threshold < 0:
@@ -109,11 +109,11 @@ def upsert_threshold(
 
 @router.delete("/thresholds/{threshold_id}", status_code=200)
 def delete_threshold(
-    require_plan(current_user, "budgets")
     threshold_id: str,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
+    require_plan(current_user, "budgets")
     result = db.execute(text("""
         DELETE FROM expense_thresholds
         WHERE id = :id AND user_id = :uid

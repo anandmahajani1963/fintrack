@@ -78,8 +78,6 @@ class Account(Base):
     member_name_plain  = Column(String, nullable=True)
     last_four     = Column(String, nullable=True)
     is_active      = Column(Boolean, nullable=False, default=True)
-    plan           = Column(String, nullable=False, default='household')
-    plan_expires_at = Column(DateTime(timezone=True), nullable=True)
     source_type   = Column(String, nullable=False, default='csv_import')
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
 

@@ -104,13 +104,22 @@ export default function Import() {
           headers: { 'Authorization': `Bearer ${access_token}` },
           body: formData,
         })
-        const result = await r.json()
-        if (!r.ok) throw new Error(result.detail || 'Import failed')
+        let result = {}
+        try { result = await r.json() } catch {}
+        if (!r.ok) {
+          const detail = result.detail
+          const msg = typeof detail === 'object'
+            ? detail.message || 'Import failed'
+            : detail || `Import failed (${r.status})`
+          const isPlanError = typeof detail === 'object' && detail.error === 'plan_required'
+          throw Object.assign(new Error(msg), { isPlanError })
+        }
         setFiles(prev => prev.map((x, j) => j === i
           ? { ...x, status: 'success', result } : x))
       } catch (err) {
         setFiles(prev => prev.map((x, j) => j === i
-          ? { ...x, status: 'error', error: err.message } : x))
+          ? { ...x, status: 'error', error: err.message,
+              isPlanError: err.isPlanError || false } : x))
       }
     }
     setImporting(false)
@@ -227,7 +236,13 @@ export default function Import() {
                 {f.status === 'error' && (
                   <div className="text-right">
                     <AlertCircle size={18} className="text-red-500 mb-0.5" />
-                    <p className="text-xs text-red-500 max-w-[120px] truncate">{f.error}</p>
+                    <p className="text-xs text-red-500 max-w-[180px]">{f.error}</p>
+                    {f.isPlanError && (
+                      <button onClick={() => window.dispatchEvent(new CustomEvent('navigate', {detail: 'upgrade'}))}
+                        className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1 hover:underline">
+                        ✦ Upgrade to Household plan →
+                      </button>
+                    )}
                   </div>
                 )}
 
