@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid, Legend, LabelList
 } from 'recharts'
 import { useAuth }   from '../context/AuthContext'
 import { analytics } from '../api/client'
@@ -12,7 +12,8 @@ import { TrendingUp, TrendingDown, Minus, AlertTriangle, XCircle, X } from 'luci
 export default function Dashboard({ year }) {
   const { password }      = useAuth()
   const [catData, setCat] = useState(null)
-  const [trend, setTrend] = useState(null)
+  const [trend, setTrend]   = useState(null)
+  const [split, setSplit]   = useState(null)
   const [large, setLarge] = useState(null)
   const [error, setError] = useState('')
   const [alerts, setAlerts] = useState([])
@@ -23,6 +24,7 @@ export default function Dashboard({ year }) {
     setCat(null); setTrend(null); setLarge(null); setError('')
     analytics.categorySummary(year).then(setCat).catch(e => setError(e.message))
     analytics.trend(year).then(setTrend).catch(e => setError(e.message))
+    analytics.essentialSplit(year).then(setSplit).catch(() => setSplit(null))
     analytics.largeExpenses(password, year, 500)
       .then(setLarge).catch(() => setLarge({ count: 0, items: [] }))
     setDismissedAlerts(false)
@@ -129,6 +131,43 @@ export default function Dashboard({ year }) {
           </AreaChart>
         </ResponsiveContainer>
       </Card>
+      {/* Stacked Essential vs Discretionary Bar Chart */}
+      {split && split.months && split.months.length > 0 && (
+        <Card>
+          <div className="font-semibold text-gray-900 dark:text-white mb-4">
+            Essential vs Discretionary — {year}
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={split.months} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(156,163,175,0.25)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} tickFormatter={m => m.split(" ")[0]} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} width={48} />
+              <Tooltip
+                formatter={(v, name) => [fmtDec(v), name === 'essential' ? 'Essential' : 'Discretionary']}
+                contentStyle={{ fontSize: 12, borderRadius: 8 }}
+              />
+              <Legend formatter={n => n === 'essential' ? 'Essential' : 'Discretionary'} />
+              <Bar dataKey="essential" stackId="a" fill="#10B981" radius={[0,0,0,0]}>
+                <LabelList
+                  dataKey="essential_pct"
+                  position="center"
+                  style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }}
+                  formatter={v => v > 5 ? `${v}%` : ''}
+                />
+              </Bar>
+              <Bar dataKey="nonessential" stackId="a" fill="#2563eb" radius={[4,4,0,0]}>
+                <LabelList
+                  dataKey="nonessential_pct"
+                  position="center"
+                  style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }}
+                  formatter={v => v > 5 ? `${v}%` : ''}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Card>
           <div className="font-semibold text-gray-900 dark:text-white mb-4">Top Categories</div>

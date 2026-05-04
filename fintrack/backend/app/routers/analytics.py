@@ -223,7 +223,7 @@ def trend(
         FROM transactions t
         WHERE t.user_id = :uid
         {' '.join(filters)}
-        GROUP BY t.year_num, t.month_num, t.txn_date
+        GROUP BY t.year_num, t.month_num, DATE_TRUNC('month', t.txn_date)
         ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
@@ -291,7 +291,7 @@ def essential_split(
         FROM transactions t
         WHERE t.user_id = :uid
         {' '.join(filters)}
-        GROUP BY t.year_num, t.month_num, t.txn_date, t.category_name, t.subcategory
+        GROUP BY t.year_num, t.month_num, DATE_TRUNC('month', t.txn_date), t.category_name, t.subcategory
         ORDER BY t.year_num, t.month_num
     """), params).fetchall()
 
