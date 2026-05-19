@@ -46,6 +46,17 @@ MERCHANT_OVERRIDES = {
     "wal-mart supercenter": ("Groceries",  "Grocery Store",             True),
     "wm supercenter":    ("Groceries",     "Grocery Store",             True),
 
+    # Shopping / Electronics
+    "t-mobile":          ("Shopping",      "Electronics (Phone)",       False),
+    "tmobile":           ("Shopping",      "Electronics (Phone)",       False),
+    "verizon":           ("Shopping",      "Electronics (Phone)",       False),
+    "att.com":           ("Shopping",      "Electronics (Phone)",       False),
+    # Insurance
+    "farmers ins":       ("Insurance",     "Home",                      True),
+    "farmers insurance": ("Insurance",     "Home",                      True),
+    "state farm":        ("Insurance",     "Car",                       True),
+    "geico":             ("Insurance",     "Car",                       True),
+    "travelers":         ("Insurance",     "Car",                       True),
     # Transport / Fuel
     "citgo":             ("Transport",     "Fuel",                      True),
     "get n geaux":       ("Transport",     "Fuel",                      True),
