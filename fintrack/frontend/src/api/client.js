@@ -135,6 +135,8 @@ export const analytics = {
     return apiFetch(`/api/v1/analytics/trend?${params}`)
   },
 
+  categoryMaster: () =>
+    apiFetch('/api/v1/analytics/category-master'),
   essentialSplit: (year) =>
     apiFetch(`/api/v1/analytics/essential-split${year ? `?year=${year}` : ''}`),
 

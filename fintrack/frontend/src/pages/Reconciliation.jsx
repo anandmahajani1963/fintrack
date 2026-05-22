@@ -26,6 +26,7 @@ export default function Reconciliation({ year }) {
 
   // Add category form state
   const [showAddForm, setShowAddForm] = useState(false)
+  const [masterList, setMasterList] = useState([])
   const [newCat, setNewCat] = useState({
     name: '', subcategory: '', is_essential: false, color_code: '#6b7280'
   })
@@ -38,6 +39,7 @@ export default function Reconciliation({ year }) {
     setCat(null); setOthers(null); setError('')
     setPending({}); setSaveResult(null)
 
+    analytics.categoryMaster().then(setMasterList).catch(() => {})
     analytics.categorySummary(year)
       .then(setCat).catch(e => setError(e.message))
 
@@ -146,90 +148,83 @@ export default function Reconciliation({ year }) {
         </button>
       </div>
 
-      {/* Add category form */}
+      {/* Add category form — uses master list */}
       {showAddForm && (
         <Card>
-          <SectionTitle>Add New Category</SectionTitle>
+          <SectionTitle>Add Category from Master List</SectionTitle>
           <form onSubmit={handleAddCategory} className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-500
                                    dark:text-gray-400 uppercase mb-1">
-                  Category Name *
+                  Select Category *
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={newCat.name}
-                  onChange={e => setNewCat(p => ({ ...p, name: e.target.value }))}
-                  placeholder="e.g. Travel"
-                  className="w-full px-3 py-2 text-sm rounded-lg border
-                             border-gray-200 dark:border-gray-600
-                             bg-white dark:bg-gray-700
-                             text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500
-                                   dark:text-gray-400 uppercase mb-1">
-                  Subcategory
-                  <span className="normal-case font-normal ml-1 text-gray-400">
-                    (leave blank to match category name)
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={newCat.subcategory}
-                  onChange={e => setNewCat(p => ({ ...p, subcategory: e.target.value }))}
-                  placeholder="e.g. International"
-                  className="w-full px-3 py-2 text-sm rounded-lg border
-                             border-gray-200 dark:border-gray-600
-                             bg-white dark:bg-gray-700
-                             text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500
-                                   dark:text-gray-400 uppercase mb-1">Type</label>
                 <select
-                  value={String(newCat.is_essential)}
-                  onChange={e => setNewCat(p => ({
-                    ...p, is_essential: e.target.value === 'true'
-                  }))}
+                  required
+                  value={newCat.name ? `${newCat.name}|||${newCat.subcategory}` : ''}
+                  onChange={e => {
+                    if (!e.target.value) return
+                    const [name, subcategory] = e.target.value.split('|||')
+                    const master = masterList.find(m => m.name === name && m.subcategory === subcategory)
+                    if (master) setNewCat({
+                      name, subcategory,
+                      is_essential: master.is_essential,
+                      color_code: master.color_code,
+                    })
+                  }}
                   className="w-full px-3 py-2 text-sm rounded-lg border
                              border-gray-200 dark:border-gray-600
                              bg-white dark:bg-gray-700
                              text-gray-900 dark:text-white
                              focus:ring-2 focus:ring-blue-500 outline-none"
                 >
-                  <option value="false">Discretionary</option>
-                  <option value="true">Essential</option>
+                  <option value="">Choose from master list…</option>
+                  {Object.entries(
+                    masterList
+                      .filter(m => !catData.categories.some(c => c.category === m.name && c.subcategory === m.subcategory))
+                      .reduce((acc, m) => {
+                        if (!acc[m.name]) acc[m.name] = []
+                        acc[m.name].push(m)
+                        return acc
+                      }, {})
+                  ).map(([group, items]) => (
+                    <optgroup key={group} label={group}>
+                      {items.map(m => (
+                        <option key={`${m.name}|||${m.subcategory}`}
+                                value={`${m.name}|||${m.subcategory}`}>
+                          {m.name} / {m.subcategory} ({m.is_essential ? 'Essential' : 'Discretionary'})
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  Only showing categories not already in your list.
+                </p>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500
-                                   dark:text-gray-400 uppercase mb-1">Color</label>
-                <div className="flex gap-2 flex-wrap">
-                  {COLOR_OPTIONS.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setNewCat(p => ({ ...p, color_code: color }))}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform
-                                  ${newCat.color_code === color
-                                    ? 'border-gray-900 dark:border-white scale-110'
-                                    : 'border-transparent'}`}
-                      style={{ background: color }}
-                    />
-                  ))}
-                </div>
+                                   dark:text-gray-400 uppercase mb-1">
+                  Selected
+                </label>
+                {newCat.name ? (
+                  <div className="px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20
+                                  border border-blue-200 dark:border-blue-700 text-sm">
+                    <p className="font-medium text-blue-800 dark:text-blue-200">
+                      {newCat.name} / {newCat.subcategory}
+                    </p>
+                    <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
+                      {newCat.is_essential ? '✓ Essential' : '○ Discretionary'}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 italic px-3 py-2">
+                    No category selected yet
+                  </p>
+                )}
               </div>
             </div>
+
 
             {/* Preview */}
             <div className="flex items-center gap-3 p-3 rounded-lg

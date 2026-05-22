@@ -536,3 +536,28 @@ def member_summary(
         "members": result,
         "total":   round(sum(m["total"] for m in result), 2),
     }
+
+
+# ── Category Master List ──────────────────────────────────────────────────────
+@router.get("/category-master")
+def category_master(
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """Return the curated master category list for dropdowns."""
+    rows = db.execute(text("""
+        SELECT name, subcategory, is_essential, color_code, keywords
+        FROM category_master
+        WHERE is_active = true
+        ORDER BY sort_order, name, subcategory
+    """)).fetchall()
+    return [
+        {
+            "name":        row.name,
+            "subcategory": row.subcategory,
+            "is_essential": row.is_essential,
+            "color_code":  row.color_code,
+            "keywords":    list(row.keywords or []),
+        }
+        for row in rows
+    ]
