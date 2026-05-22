@@ -561,3 +561,100 @@ def category_master(
         }
         for row in rows
     ]
+
+
+# ── AI Interest Hint ──────────────────────────────────────────────────────────
+INTEREST_PATTERNS = [
+    'interest charge', 'finance charge', 'interest fee',
+    'late fee', 'late payment', 'minimum payment warning',
+    'overlimit fee', 'returned payment fee',
+]
+
+@router.get("/interest-hint")
+def interest_hint(
+    current_user: CurrentUser,
+    year: Optional[int] = Query(None),
+    password: str = Header(..., alias="x-fintrack-password"),
+    db: Session = Depends(get_db),
+):
+    """
+    Detect interest and fee charges. Returns a subtle hint if found.
+    No financial advice — just factual pattern detection.
+    """
+    from app.routers.transactions import _get_user_key
+    from app.services.encryption import decrypt
+
+    enc_key = _get_user_key(current_user.id, password, db)
+
+    params = {"uid": str(current_user.id)}
+    filters = []
+    if year:
+        filters.append("AND year_num = :year")
+        params["year"] = year
+
+    rows = db.execute(text(f"""
+        SELECT id, txn_date, amount, description, category_name
+        FROM transactions
+        WHERE user_id = :uid
+        {' '.join(filters)}
+        ORDER BY txn_date
+    """), params).fetchall()
+
+    interest_txns = []
+    total_interest = 0.0
+    total_fees = 0.0
+
+    for row in rows:
+        try:
+            desc = decrypt(row.description, enc_key).lower()
+            matched_pattern = next(
+                (p for p in INTEREST_PATTERNS if p in desc), None
+            )
+            if matched_pattern:
+                amount = float(row.amount)
+                is_fee = 'fee' in matched_pattern
+                if is_fee:
+                    total_fees += amount
+                else:
+                    total_interest += amount
+                interest_txns.append({
+                    "date":     str(row.txn_date),
+                    "amount":   round(amount, 2),
+                    "desc":     decrypt(row.description, enc_key)[:60],
+                    "type":     "fee" if is_fee else "interest",
+                })
+        except Exception:
+            continue
+
+    total = round(total_interest + total_fees, 2)
+
+    if not interest_txns:
+        return {
+            "found": False,
+            "message": None,
+            "total": 0,
+            "transactions": [],
+        }
+
+    # Build the hint message
+    parts = []
+    if total_interest > 0:
+        parts.append(f"${total_interest:.2f} in interest charges")
+    if total_fees > 0:
+        parts.append(f"${total_fees:.2f} in late/other fees")
+
+    year_label = str(year) if year else "this period"
+    hint = (
+        f"You paid {' and '.join(parts)} in {year_label}. "
+        f"Paying the full balance each month could eliminate these charges."
+    )
+
+    return {
+        "found":        True,
+        "total":        total,
+        "total_interest": round(total_interest, 2),
+        "total_fees":   round(total_fees, 2),
+        "count":        len(interest_txns),
+        "hint":         hint,
+        "transactions": interest_txns,
+    }

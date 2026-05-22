@@ -135,6 +135,11 @@ export const analytics = {
     return apiFetch(`/api/v1/analytics/trend?${params}`)
   },
 
+  interestHint: (password, year) => {
+    const params = new URLSearchParams()
+    if (year) params.set('year', year)
+    return apiFetch(`/api/v1/analytics/interest-hint?${params}`, {}, password)
+  },
   categoryMaster: () =>
     apiFetch('/api/v1/analytics/category-master'),
   essentialSplit: (year) =>

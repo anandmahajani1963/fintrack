@@ -13,7 +13,8 @@ export default function Dashboard({ year }) {
   const { password }      = useAuth()
   const [catData, setCat] = useState(null)
   const [trend, setTrend]   = useState(null)
-  const [split, setSplit]   = useState(null)
+  const [split, setSplit]       = useState(null)
+  const [interest, setInterest] = useState(null)
   const [large, setLarge] = useState(null)
   const [error, setError] = useState('')
   const [alerts, setAlerts] = useState([])
@@ -25,6 +26,10 @@ export default function Dashboard({ year }) {
     analytics.categorySummary(year).then(setCat).catch(e => setError(e.message))
     analytics.trend(year).then(setTrend).catch(e => setError(e.message))
     analytics.essentialSplit(year).then(setSplit).catch(() => setSplit(null))
+    if (password) {
+      analytics.interestHint(password, year)
+        .then(setInterest).catch(() => setInterest(null))
+    }
     analytics.largeExpenses(password, year, 500)
       .then(setLarge).catch(() => setLarge({ count: 0, items: [] }))
     setDismissedAlerts(false)
@@ -97,6 +102,37 @@ export default function Dashboard({ year }) {
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0">
             <X size={16} />
           </button>
+        </div>
+      )}
+
+      {/* AI Interest Hint */}
+      {interest?.found && (
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800
+                        bg-blue-50 dark:bg-blue-900/20 p-4 flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">💡</span>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+              Interest & Fee Activity Detected
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+              {interest.hint}
+            </p>
+            <div className="flex gap-4 mt-2">
+              {interest.total_interest > 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  Interest: ${interest.total_interest.toFixed(2)}
+                </span>
+              )}
+              {interest.total_fees > 0 && (
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  Fees: ${interest.total_fees.toFixed(2)}
+                </span>
+              )}
+              <span className="text-xs text-blue-500 dark:text-blue-500">
+                {interest.count} transaction{interest.count > 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
