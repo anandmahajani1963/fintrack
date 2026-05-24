@@ -1,7 +1,7 @@
 // ============================================================
 // fintrack mobile — App navigator
 // File: src/navigation/AppNavigator.js
-// Version: 1.0 — 2026-04-20
+// Version: 1.1 — 2026-05-24 — added Categories and Budgets tabs
 // ============================================================
 
 import React from 'react'
@@ -9,14 +9,22 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useColorScheme, Text } from 'react-native'
 import DashboardScreen    from '../screens/DashboardScreen'
 import TransactionsScreen from '../screens/TransactionsScreen'
+import CategoriesScreen   from '../screens/CategoriesScreen'
+import BudgetsScreen      from '../screens/BudgetsScreen'
 
 const Tab = createBottomTabNavigator()
 
+const TAB_ICONS = {
+  Dashboard:    '📊',
+  Categories:   '🥧',
+  Transactions: '📋',
+  Budgets:      '🎯',
+}
+
 function TabIcon({ label, focused }) {
-  const icons = { Dashboard: '📊', Transactions: '📋' }
   return (
     <Text style={{ fontSize: focused ? 22 : 20, opacity: focused ? 1 : 0.5 }}>
-      {icons[label] || '●'}
+      {TAB_ICONS[label] || '●'}
     </Text>
   )
 }
@@ -40,11 +48,13 @@ export default function AppNavigator() {
           paddingBottom: 4,
           height: 60,
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
       })}
     >
       <Tab.Screen name="Dashboard"    component={DashboardScreen} />
+      <Tab.Screen name="Categories"   component={CategoriesScreen} />
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
+      <Tab.Screen name="Budgets"      component={BudgetsScreen} />
     </Tab.Navigator>
   )
 }

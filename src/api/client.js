@@ -1,7 +1,7 @@
 // ============================================================
 // fintrack mobile — API client
 // File: src/api/client.js
-// Version: 1.1 — 2026-04-20 — switched to fetch (axios blocked by Expo Go)
+// Version: 1.2 — 2026-05-24 — added categories, budgets, interest hint
 // ============================================================
 
 export const API_BASE = 'http://192.168.1.170:30800'
@@ -27,14 +27,17 @@ async function apiFetch(path, options = {}) {
   if (_token)    headers['Authorization']       = `Bearer ${_token}`
   if (_password) headers['X-Fintrack-Password'] = _password
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  })
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers })
 
-  const data = await res.json()
+  let data = {}
+  try { data = await res.json() } catch {}
+
   if (!res.ok) {
-    const err = new Error(data.detail || `HTTP ${res.status}`)
+    const err = new Error(
+      typeof data.detail === 'object'
+        ? data.detail.message || `HTTP ${res.status}`
+        : data.detail || `HTTP ${res.status}`
+    )
     err.response = { status: res.status, data }
     throw err
   }
@@ -47,20 +50,17 @@ export const auth = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
-
   refresh: (refresh_token) =>
     apiFetch('/api/v1/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ refresh_token }),
     }),
-
   mfaChallenge: (code, token) =>
     apiFetch('/api/v1/mfa/challenge', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({ code }),
     }),
-
   sendLoginOTP: (token) =>
     apiFetch('/api/v1/mfa/send-login-otp', {
       method: 'POST',
@@ -77,6 +77,12 @@ export const analytics = {
 
   budgetStatus: (year) =>
     apiFetch(`/api/v1/budget/status?year=${year}`),
+
+  essentialSplit: (year) =>
+    apiFetch(`/api/v1/analytics/essential-split?year=${year}`),
+
+  interestHint: (year) =>
+    apiFetch(`/api/v1/analytics/interest-hint?year=${year}`),
 }
 
 export const transactions = {
