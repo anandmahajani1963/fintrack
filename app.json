@@ -1,27 +1,70 @@
 {
   "expo": {
-    "name": "fintrack-mobile",
+    "name": "fintrack",
     "slug": "fintrack-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1E2761"
     },
+
+    "description": "fintrack — Personal finance tracking with zero-knowledge encryption. Import from any major bank or credit card, track household spending across categories, set budgets, and get insights — all without sharing your credentials with anyone.",
+
+    "primaryColor": "#2563EB",
+
+    "ios": {
+      "bundleIdentifier": "com.YOURCOMPANY.fintrack",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "requireFullScreen": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access is not required for this app.",
+        "NSFaceIDUsageDescription": "Face ID is used to secure access to your financial data.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+
     "android": {
+      "package": "com.YOURCOMPANY.fintrack",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1E2761"
       },
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": false,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
-    "ios": {
-      "supportsTablet": true
-    },
-    "plugins": ["expo-secure-store"]
+
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1"
+          },
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24
+          }
+        }
+      ]
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_AFTER_EAS_INIT"
+      }
+    }
   }
 }
