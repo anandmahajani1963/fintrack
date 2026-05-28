@@ -7,29 +7,23 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#1E2761"
     },
-
-    "description": "fintrack — Personal finance tracking with zero-knowledge encryption. Import from any major bank or credit card, track household spending across categories, set budgets, and get insights — all without sharing your credentials with anyone.",
-
+    "description": "fintrack - Personal finance tracking with zero-knowledge encryption.",
     "primaryColor": "#2563EB",
-
     "ios": {
       "bundleIdentifier": "com.YOURCOMPANY.fintrack",
       "buildNumber": "1",
       "supportsTablet": true,
       "requireFullScreen": false,
       "infoPlist": {
-        "NSCameraUsageDescription": "Camera access is not required for this app.",
         "NSFaceIDUsageDescription": "Face ID is used to secure access to your financial data.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-
     "android": {
       "package": "com.YOURCOMPANY.fintrack",
       "versionCode": 1,
@@ -43,14 +37,13 @@
         "android.permission.ACCESS_NETWORK_STATE"
       ]
     },
-
     "plugins": [
       "expo-secure-store",
       [
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "15.1"
+            "deploymentTarget": "16.4"
           },
           "android": {
             "compileSdkVersion": 35,
@@ -60,11 +53,11 @@
         }
       ]
     ],
-
     "extra": {
       "eas": {
-        "projectId": "REPLACE_AFTER_EAS_INIT"
+        "projectId": "e2e716f0-ca20-46a6-a115-10346a7deff0"
       }
-    }
+    },
+    "owner": "anandmahajani"
   }
 }
