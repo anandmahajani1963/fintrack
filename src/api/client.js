@@ -33,6 +33,8 @@ async function apiFetch(path, options = {}) {
   try { data = await res.json() } catch {}
 
   if (!res.ok) {
+    console.log('API Error status:', res.status)
+    console.log('API Error data:', JSON.stringify(data))
     const err = new Error(
       typeof data.detail === 'object'
         ? data.detail.message || `HTTP ${res.status}`

@@ -13,8 +13,15 @@ import LoginScreen  from './src/screens/LoginScreen'
 import AppNavigator from './src/navigation/AppNavigator'
 
 function AppInner() {
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, user } = useAuth()
   const scheme = useColorScheme()
+  const [ready, setReady] = React.useState(false)
+
+  React.useEffect(() => {
+    setReady(true)
+  }, [])
+
+  if (!ready) return null
 
   return (
     <NavigationContainer>

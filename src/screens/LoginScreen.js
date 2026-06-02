@@ -32,24 +32,27 @@ export default function LoginScreen() {
     if (!email || !password) { setError('Email and password required'); return }
     setError(''); setBusy(true)
     console.log('Attempting login:', email, 'pwd length:', password.length)
-    try {
-      const result = await login(email, password)
-      if (result.mfa_required) {
-        setPending(result)
-        setMfaType(result.mfa_type)
-        if (result.mfa_type === 'email') {
-          await auth.sendLoginOTP(result.pending_token)
-        }
-        setStep('mfa')
+  try {
+    console.log('Calling login...')
+    const result = await login(email, password)
+    console.log('Login result:', JSON.stringify(result))
+    if (result.mfa_required) {
+      setPending(result)
+      setMfaType(result.mfa_type)
+      if (result.mfa_type === 'email') {
+        await auth.sendLoginOTP(result.pending_token)
       }
-    } catch (err) {
-      console.log('Login error:', JSON.stringify(err.response?.data))
-      console.log('Error status:', err.response?.status)
-      console.log('Error message:', err.message)
-      setError(err.response?.data?.detail || 'Invalid email or password')
+      setStep('mfa')
     }
-    setBusy(false)
+  } catch (err) {
+    console.log('=== LOGIN ERROR ===')
+    console.log('err.message:', err.message)
+    console.log('err.response:', JSON.stringify(err.response))
+    console.log('err.response?.status:', err.response?.status)
+    console.log('err.response?.data:', JSON.stringify(err.response?.data))
+    setError(err.response?.data?.detail || err.message || 'Invalid email or password')
   }
+  setBusy(false)  }
 
   async function handleMFA() {
     if (!mfaCode || mfaCode.length !== 6) {

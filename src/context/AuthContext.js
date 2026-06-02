@@ -53,11 +53,19 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function _completeLogin(data, pwd) {
-    setToken(data.access_token)
-    setUser({ email: data.email, id: data.user_id })
-    setPassword(pwd)
-    setAuthHeaders(data.access_token, pwd)
-    await SecureStore.setItemAsync('refresh_token', data.refresh_token)
+      console.log('=== _completeLogin called ===')
+      setToken(data.access_token)
+      setUser({ email: data.email, id: data.user_id })
+      setPassword(pwd)
+      setAuthHeaders(data.access_token, pwd)
+      try {
+          await SecureStore.setItemAsync('refresh_token', data.refresh_token)
+          console.log('SecureStore saved OK')
+      } catch (e) {
+          console.log('SecureStore failed:', e.message)
+          // Continue anyway — user is logged in, just no refresh token persistence
+      }
+      console.log('=== _completeLogin done ===')
   }
 
   const logout = useCallback(async () => {
