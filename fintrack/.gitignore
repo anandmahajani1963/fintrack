@@ -68,3 +68,23 @@ test_output/
 
 ../../.cache/
 ../../.mozilla/
+
+# OS and application cache files
+../.cache/
+../.mozilla/
+../.local/
+../.config/
+../.docker/buildx/
+../.vboxclient-*
+../.bash_history
+../.bashrc
+../.gitconfig
+../.viminfo
+../.vim/
+../.lesshst
+../.ssh/
+../.kube/
+../.aws/
+../.git-credentials
+../AWS/
+../aws-ids.txt

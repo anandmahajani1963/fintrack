@@ -32,6 +32,8 @@ const TIERS = [
     name:    'Household',
     price:   '$4.99',
     period:  'per month',
+    annual:  '$49.99/yr',
+    savings: '2 months free',
     color:   'blue',
     badge:   'Most Popular',
     features: [
@@ -51,6 +53,8 @@ const TIERS = [
     name:    'Premium',
     price:   '$9.99',
     period:  'per month',
+    annual:  '$99.99/yr',
+    savings: '2 months free',
     color:   'purple',
     badge:   'Coming Soon',
     features: [
@@ -152,6 +156,14 @@ export default function Upgrade() {
                     /{tier.period}
                   </span>
                 </div>
+                {tier.annual && (
+                  <div className={`text-xs mt-1 px-2 py-1 rounded-full inline-block
+                    ${isHighlight
+                      ? 'bg-white/20 text-blue-100'
+                      : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'}`}>
+                    {tier.annual} · {tier.savings}
+                  </div>
+                )}
               </div>
 
               {/* Features */}
