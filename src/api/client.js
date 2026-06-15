@@ -4,7 +4,8 @@
 // Version: 1.2 — 2026-05-24 — added categories, budgets, interest hint
 // ============================================================
 
-export const API_BASE = 'http://192.168.1.170:30800'
+//export const API_BASE = 'http://192.168.1.170:30800'
+export const API_BASE = 'https://app.nudgelabs.app'
 
 let _token    = null
 let _password = null
