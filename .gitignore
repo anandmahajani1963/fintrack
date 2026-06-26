@@ -1,8 +1,7 @@
-# Environment files — never commit secrets
+# Secrets
 .env
-.env.local
-.env.production
-*.env
+.env.*
+aws-ids.txt
 
 # Python
 __pycache__/
@@ -11,14 +10,28 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
-dist/
-build/
-*.egg-info/
 venv/
 .venv/
 
-# PostgreSQL data
+# Node
+node_modules/
+dist/
+
+# Android (built by Capacitor, not source)
+frontend/android/
+
+# Database data
 database/pgdata/
+
+# Build artifacts
+*.tar.gz
+*.egg-info/
+
+# Backup/old files
+*.old
+*.safe
+*.v1
+frontend.delete/
 
 # Logs
 *.log
@@ -34,14 +47,11 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Flutter / Dart
-frontend/.dart_tool/
-frontend/.flutter-plugins
-frontend/.flutter-plugins-dependencies
-frontend/build/
-frontend/*.g.dart
+# Keystore (keep this out of git — back up separately)
+*.keystore
 
 # Test artifacts
 test_output/
 *.xlsx
 *.csv
+.ipynb_checkpoints/

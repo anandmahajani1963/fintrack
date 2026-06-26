@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<application-state>
-  <context id="">
-    <application id="firefox.desktop" score="23071.23046875" last-seen="1775340465"/>
-    <application id="gnome-control-center.desktop" score="8.28515625" last-seen="1775332291"/>
-    <application id="org.gnome.Terminal.desktop" score="8990.921875" last-seen="1775341729"/>
-    <application id="gnome-network-panel.desktop" score="0" last-seen="0"/>
-  </context>
-</application-state>

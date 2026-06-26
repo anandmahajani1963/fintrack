@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide — fintrack by Nudge Labs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #f8f9fc;
+    }
+
+    header {
+      background: #2563EB;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: #fff;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    header span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-left: 4px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 48px auto;
+      padding: 0 24px 80px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .meta strong { color: #374151; }
+
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin: 40px 0 12px;
+    }
+
+    h2:first-of-type { margin-top: 0; }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e40af;
+      margin: 24px 0 8px;
+    }
+
+    p { margin-bottom: 14px; color: #374151; }
+
+    ol, ul {
+      margin: 8px 0 14px 20px;
+      color: #374151;
+    }
+
+    ol li, ul li { margin-bottom: 6px; }
+
+    .highlight {
+      background: #eff6ff;
+      border-left: 4px solid #2563EB;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 15px;
+      color: #1e40af;
+    }
+
+    .warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 15px;
+      color: #92400e;
+    }
+
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 14px;
+      color: #166534;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 14px;
+    }
+
+    th {
+      background: #1e3a8a;
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      color: #374151;
+    }
+
+    tr:nth-child(even) { background: #f9fafb; }
+
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1e40af;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .format-box {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+
+    .format-box h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+
+    .toc {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .toc h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: #1e3a8a;
+    }
+
+    .toc a {
+      color: #2563EB;
+      text-decoration: none;
+      display: block;
+      padding: 3px 0;
+      font-size: 14px;
+    }
+
+    .toc a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+      padding: 32px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    footer a { color: #9ca3af; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ft</div>
+  <div>
+    <h1>fintrack <span>User Guide</span></h1>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="meta">
+    <strong>User Guide</strong> &nbsp;·&nbsp;
+    Version 2.0 &nbsp;·&nbsp;
+    Last updated: June 23, 2026
+  </div>
+
+  <div class="highlight">
+    fintrack is a zero-knowledge personal finance tracker. Your transaction data is encrypted on your device before it reaches our servers. We never see your spending.
+  </div>
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <a href="#getting-started">1. Getting Started</a>
+    <a href="#your-plan">2. Your Plan</a>
+    <a href="#importing">3. Importing Transactions</a>
+    <a href="#formats">4. Supported Formats &amp; Column Layouts</a>
+    <a href="#import-tips">5. Import Tips &amp; Best Practices</a>
+    <a href="#dashboard">6. Understanding Your Dashboard</a>
+    <a href="#categories">7. Categories &amp; Reconciliation</a>
+    <a href="#budgets">8. Budgets</a>
+    <a href="#exporting">9. Exporting Your Data</a>
+    <a href="#mobile">10. Mobile App</a>
+    <a href="#security">11. Privacy &amp; Security</a>
+    <a href="#faq">12. Frequently Asked Questions</a>
+  </div>
+
+  <!-- ─── 1. Getting Started ─── -->
+  <h2 id="getting-started">1. Getting Started</h2>
+
+  <h3>Creating Your Account</h3>
+  <ol>
+    <li>Open fintrack at <a href="https://fintrack.nudgelabs.app">https://fintrack.nudgelabs.app</a></li>
+    <li>Click <strong>"Create an account"</strong> on the login page</li>
+    <li>Enter your email and a strong password (10+ characters, including an uppercase letter and a number)</li>
+    <li>Set up two-factor authentication (MFA) &mdash; choose TOTP app or Email OTP</li>
+    <li>Scan the QR code with DUO, Google Authenticator, or Authy</li>
+    <li>Enter the 6-digit code to verify setup &mdash; your dashboard loads</li>
+  </ol>
+  <div class="tip">💡 Use DUO or Google Authenticator for the most secure MFA experience.</div>
+
+  <h3>Logging In</h3>
+  <ol>
+    <li>Enter your email and password</li>
+    <li>Enter the 6-digit code from your authenticator app</li>
+    <li>Your session expires after 30 minutes of inactivity &mdash; a 60-second warning appears before logout</li>
+  </ol>
+  <div class="tip">💡 Click "Stay logged in" in the warning dialog to reset the session timer.</div>
+
+  <h3>Forgot Your Password?</h3>
+  <div class="warning">
+    <strong>⚠️ Important:</strong> Due to fintrack's zero-knowledge encryption, your password is the key that encrypts all your financial data. There is no way to retrieve a forgotten password. Resetting your password will <strong>permanently and irreversibly delete all your existing transaction data</strong>. You will start with a completely fresh account. This cannot be undone.
+  </div>
+  <ol>
+    <li>Click <strong>"Forgot password?"</strong> on the login page</li>
+    <li>Enter your email &mdash; a reset link is sent (expires in 30 minutes)</li>
+    <li>Click the link and set a new password</li>
+    <li>Log in with your new password &mdash; your account will be empty and you will need to re-import your transactions</li>
+  </ol>
+
+  <h3>Lost Your Authenticator?</h3>
+  <ol>
+    <li>On the MFA screen, click <strong>"Lost access to your authenticator?"</strong></li>
+    <li>Enter your email to receive a recovery code</li>
+    <li>Enter the code plus your fintrack password</li>
+    <li>Set up MFA again immediately after recovery</li>
+  </ol>
+
+  <!-- ─── 2. Your Plan ─── -->
+  <h2 id="your-plan">2. Your Plan</h2>
+  <p>fintrack offers three subscription tiers. Your current plan is shown in the sidebar. Click "Upgrade Plan" to view pricing and upgrade.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Free</th>
+        <th>Household</th>
+        <th>Premium</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Cards</td><td>1</td><td>Unlimited</td><td>Unlimited</td></tr>
+      <tr><td>History</td><td>12 months</td><td>Unlimited</td><td>Unlimited</td></tr>
+      <tr><td>Budget alerts</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>PDF/Excel export</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>MFA</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Live bank feeds</td><td>No</td><td>No</td><td>Yes (Plaid)</td></tr>
+      <tr><td>Price</td><td>$0/mo</td><td>$4.99/mo</td><td>$9.99/mo</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── 3. Importing Transactions ─── -->
+  <h2 id="importing">3. Importing Transactions</h2>
+
+  <h3>Downloading Statements from Your Bank</h3>
+  <p>Each bank has a slightly different process for downloading CSV statements:</p>
+  <ul>
+    <li><strong>Chase (credit card):</strong> chase.com &rarr; Activity &rarr; Download icon &rarr; select CSV &rarr; choose date range</li>
+    <li><strong>Chase (checking):</strong> chase.com &rarr; Activity &rarr; Download icon &rarr; select CSV. Note: the checking export has a different format from the credit card export (see section 4)</li>
+    <li><strong>Citi:</strong> citibank.com &rarr; Account Summary &rarr; click account &rarr; Download or Export &rarr; CSV</li>
+    <li><strong>Bank of America:</strong> bankofamerica.com &rarr; Statements &rarr; Download &rarr; CSV</li>
+    <li><strong>AmEx:</strong> americanexpress.com &rarr; Statements &amp; Activity &rarr; Download &rarr; CSV</li>
+  </ul>
+  <div class="tip">💡 Download one year at a time per account. This keeps file sizes manageable and makes duplicate detection more reliable.</div>
+
+  <h3>Importing a File</h3>
+  <ol>
+    <li>Click <strong>"Import Data"</strong> in the sidebar</li>
+    <li>Drop your CSV file or click to browse</li>
+    <li>Select the CSV format (auto-detected from filename if named with bank prefix)</li>
+    <li>Enter a card nickname &mdash; this is required and identifies the account (e.g. "Citi Shared 2025")</li>
+    <li>Enter your fintrack password &mdash; used to encrypt your data before storage</li>
+    <li>Click <strong>"Import files"</strong> &mdash; results show imported, duplicates, and skipped counts</li>
+  </ol>
+  <div class="tip">💡 Use a consistent nickname for the same card across imports. The nickname is used to detect duplicates &mdash; importing the same file twice with the same nickname will show all duplicates and import nothing new.</div>
+
+  <!-- ─── 4. Supported Formats ─── -->
+  <h2 id="formats">4. Supported Formats &amp; Column Layouts</h2>
+  <p>fintrack auto-detects the CSV format based on your file's column headers. There are four supported layouts:</p>
+
+  <div class="format-box">
+    <h4>Format A &mdash; Separate Debit/Credit Columns</h4>
+    <p>Used by: <strong>Citi, AmEx, Discover, Capital One</strong></p>
+    <p>Header pattern: <code>Date, Description, Debit, Credit</code></p>
+    <p>Debits (purchases) appear in the Debit column; payments and refunds appear in the Credit column. fintrack imports debits as expenses and skips credits (payments).</p>
+    <div class="tip">💡 Citi year-end exports sometimes include a 3&ndash;5 line summary preamble above the actual CSV header. fintrack automatically scans for the header row and skips any preamble.</div>
+  </div>
+
+  <div class="format-box">
+    <h4>Format B &mdash; Single Amount Column (Negative = Purchase)</h4>
+    <p>Used by: <strong>Chase credit cards, Bank of America, Wells Fargo</strong></p>
+    <p>Header pattern: <code>Transaction Date, Post Date, Description, Category, Type, Amount</code></p>
+    <p>Purchases appear as negative numbers (e.g. <code>-88.33</code>); payments appear as positive numbers. fintrack flips the sign so expenses become positive, then skips credits.</p>
+  </div>
+
+  <div class="format-box">
+    <h4>Format C &mdash; Single Amount Column (Positive = Purchase)</h4>
+    <p>Used by: <strong>Some regional banks and older export formats</strong></p>
+    <p>Header pattern: <code>Date, Description, Amount</code></p>
+    <p>Purchases appear as positive numbers. Credits and payments appear as negative numbers and are skipped.</p>
+  </div>
+
+  <div class="format-box">
+    <h4>Format D &mdash; Chase Checking Accounts</h4>
+    <p>Used by: <strong>Chase checking and savings accounts</strong></p>
+    <p>Header pattern: <code>Details, Posting Date, Description, Amount, Type, Balance, Check or Slip #</code></p>
+    <p>This format is different from Chase credit cards. The <code>Details</code> column contains DEBIT or CREDIT. The <code>Amount</code> column is already signed: negative for debits (outflows), positive for credits (inflows). fintrack imports debits as expenses and skips credits (deposits, payroll, interest).</p>
+    <div class="warning">
+      <strong>Known quirk:</strong> Chase checking CSV files include a trailing comma on every data row, creating an extra empty column. fintrack handles this automatically, but if you open the file in Excel and re-save it, Excel may strip the trailing comma, which is fine &mdash; fintrack handles both cases.
+    </div>
+  </div>
+
+  <h3>Column Reference</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Format</th>
+        <th>Date Column</th>
+        <th>Description Column</th>
+        <th>Amount Handling</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A (Citi, AmEx)</td>
+        <td>Date, Transaction Date, Posting Date</td>
+        <td>Description</td>
+        <td>Debit column = expense</td>
+      </tr>
+      <tr>
+        <td>B (Chase card, BofA)</td>
+        <td>Transaction Date, Post Date</td>
+        <td>Description</td>
+        <td>Negative amount = expense</td>
+      </tr>
+      <tr>
+        <td>C (Regional)</td>
+        <td>Date, Transaction Date</td>
+        <td>Description</td>
+        <td>Positive amount = expense</td>
+      </tr>
+      <tr>
+        <td>D (Chase checking)</td>
+        <td>Posting Date</td>
+        <td>Description</td>
+        <td>Negative amount = expense</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── 5. Import Tips ─── -->
+  <h2 id="import-tips">5. Import Tips &amp; Best Practices</h2>
+  <ul>
+    <li><strong>One year per file:</strong> Download and import one calendar year at a time per account. This keeps files manageable and helps you track what has been imported.</li>
+    <li><strong>Consistent nicknames:</strong> Always use the same card nickname for the same account (e.g. always "Chase Shared" for your shared Chase card). Nicknames drive duplicate detection.</li>
+    <li><strong>Duplicate safety:</strong> Re-importing the same file with the same nickname is safe &mdash; fintrack detects exact duplicates and skips them. You will see "0 imported, N duplicates" in the result.</li>
+    <li><strong>File encoding:</strong> fintrack accepts UTF-8 and ASCII CSV files. If your file has unusual characters or won't import, open it in a text editor and save as UTF-8.</li>
+    <li><strong>Date formats:</strong> Both <code>MM/DD/YYYY</code> and <code>YYYY-MM-DD</code> are auto-detected. No manual date format selection is needed.</li>
+    <li><strong>Don't edit the CSV:</strong> Import the file exactly as downloaded from your bank. Editing in Excel can change date formats, remove trailing commas, or alter the encoding in ways that break the import.</li>
+    <li><strong>Skipped rows:</strong> Some rows are intentionally skipped: credits (payments, refunds, deposits), zero-amount rows, and rows that cannot be parsed. The import result shows the exact count.</li>
+    <li><strong>Multi-member households:</strong> If your CSV contains a "Member" or "Card Member" column (e.g. AmEx), fintrack automatically assigns transactions to the correct household member.</li>
+  </ul>
+
+  <!-- ─── 6. Dashboard ─── -->
+  <h2 id="dashboard">6. Understanding Your Dashboard</h2>
+  <p>The Dashboard gives an instant snapshot of household finances for the selected year.</p>
+  <ul>
+    <li><strong>Year selector (top):</strong> Switch between years to compare spending across periods.</li>
+    <li><strong>Total spending card (blue):</strong> Grand total with transaction and category counts.</li>
+    <li><strong>Budget alerts (red/amber banner):</strong> Appears when any budget is at 80%+ or exceeded.</li>
+    <li><strong>Top categories:</strong> Largest spending categories with amounts and percentages.</li>
+    <li><strong>Monthly trend chart:</strong> Month-by-month spending to spot seasonal patterns.</li>
+    <li><strong>Large expenses (bottom):</strong> Individual transactions over $500.</li>
+  </ul>
+
+  <!-- ─── 7. Categories ─── -->
+  <h2 id="categories">7. Categories &amp; Reconciliation</h2>
+
+  <h3>How Categories Work</h3>
+  <p>fintrack automatically categorizes transactions using keyword matching on the transaction description. Uncategorized transactions land in "Other". Aim to keep "Other" below 5% for meaningful analytics.</p>
+
+  <h3>Fixing Uncategorized Transactions</h3>
+  <ol>
+    <li>Click <strong>"Reconciliation"</strong> in the sidebar</li>
+    <li>The page shows all transactions in the "Other" category</li>
+    <li>Use the dropdown to assign the correct category and subcategory to each transaction</li>
+    <li>Click <strong>"Save X changes"</strong> to apply all edits at once</li>
+  </ol>
+
+  <h3>Adding New Categories</h3>
+  <ol>
+    <li>On the Reconciliation page, click <strong>"+ Add Category"</strong> (top right)</li>
+    <li>Enter category name, subcategory, Essential/Discretionary flag, and color</li>
+    <li>Click <strong>"Add Category"</strong> &mdash; it immediately appears in all dropdowns</li>
+  </ol>
+
+  <!-- ─── 8. Budgets ─── -->
+  <h2 id="budgets">8. Budgets</h2>
+  <p>Available on Household and Premium plans. Set monthly or annual spending limits for any category.</p>
+  <ol>
+    <li>Click <strong>"Budgets"</strong> in the sidebar</li>
+    <li>Click <strong>"Set Budget"</strong> and choose category, period, and amount</li>
+    <li>The Dashboard shows a traffic-light alert when limits are approached or exceeded</li>
+  </ol>
+  <div class="tip">💡 Set annual budgets for irregular expenses like vacations or home repairs.</div>
+
+  <!-- ─── 9. Exporting ─── -->
+  <h2 id="exporting">9. Exporting Your Data</h2>
+  <p>Available on Household and Premium plans.</p>
+  <ul>
+    <li><strong>PDF Report:</strong> Landscape format with Financial Summary, Categories, Monthly Pivot, and Transactions.</li>
+    <li><strong>Excel Workbook:</strong> 4 sheets &mdash; Summary, Monthly Pivot, Transactions, Categories.</li>
+  </ul>
+  <div class="warning">⚠️ Exported files contain your decrypted transaction descriptions. Store them securely and do not share them.</div>
+
+  <!-- ─── 10. Mobile ─── -->
+  <h2 id="mobile">10. Mobile App</h2>
+  <p>fintrack is available as a native Android app on the Google Play Store.</p>
+  <ol>
+    <li>Search for <strong>"Fintrack"</strong> by Nudge Labs on the Play Store, or visit the direct link</li>
+    <li>Install and open the app</li>
+    <li>Log in with your fintrack credentials &mdash; MFA is fully supported</li>
+  </ol>
+  <p>The mobile app provides full access to your Dashboard, transaction list, import, and all other features. Your data is encrypted on-device using the same zero-knowledge architecture as the web app.</p>
+
+  <!-- ─── 11. Security ─── -->
+  <h2 id="security">11. Privacy &amp; Security</h2>
+  <p>fintrack is built on a zero-knowledge model &mdash; your financial data is yours alone.</p>
+  <ul>
+    <li>Transaction descriptions are encrypted on your device before saving &mdash; the server cannot read them</li>
+    <li>Your password is never stored &mdash; only a cryptographic key-check hash is kept</li>
+    <li>MFA protects against password theft</li>
+    <li>Session timeout logs you out after 30 minutes of inactivity</li>
+    <li>All traffic is encrypted via HTTPS/TLS</li>
+    <li>No third-party bank connections for data import &mdash; you import CSV files yourself</li>
+    <li>No ads, no tracking, no data selling &mdash; ever</li>
+  </ul>
+  <p>For full details, read our <a href="/privacy.html">Privacy Policy</a>.</p>
+
+  <!-- ─── 12. FAQ ─── -->
+  <h2 id="faq">12. Frequently Asked Questions</h2>
+
+  <h3>Why were some rows skipped during import?</h3>
+  <p>fintrack is an expense tracker, so it intentionally skips rows that are not expenses. For credit cards, this means payments and refunds (credits) are skipped. For checking accounts, deposits, payroll, interest, and incoming transfers are skipped. The import result shows the exact count of skipped rows. Zero-amount rows are also skipped.</p>
+
+  <h3>Why does my import show "0 imported, 0 duplicates"?</h3>
+  <p>This usually means the CSV format was not recognized. Double-check that you selected the correct format for your bank, and that the file is the original CSV download (not edited in Excel). If the problem persists, contact us at <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a> with a sample of the file header.</p>
+
+  <h3>What is the difference between Chase credit card and Chase checking formats?</h3>
+  <p>Chase credit card exports use the header <code>Transaction Date, Post Date, Description, Category, Type, Amount</code>. Chase checking exports use <code>Details, Posting Date, Description, Amount, Type, Balance, Check or Slip #</code>. These are different formats (B and D respectively) and the correct one must be selected. fintrack usually auto-detects the right format from the column headers.</p>
+
+  <h3>Can I import the same file twice?</h3>
+  <p>Yes, safely. fintrack detects exact duplicates based on the card nickname, date, description, and amount. If all transactions in the file have already been imported, you will see "0 imported, N duplicates." No data is created twice.</p>
+
+  <h3>Why are internal transfers showing as expenses?</h3>
+  <p>Transfers between your own accounts (e.g. checking to savings, Zelle to yourself) appear as debits in your bank's CSV export. fintrack imports them as expenses because it cannot distinguish a transfer from a payment to someone else. You can recategorize these to "Transfers" on the Reconciliation page to keep your spending totals accurate.</p>
+
+  <h3>What happens if I forget my password?</h3>
+  <p>Because fintrack uses zero-knowledge encryption, your password is the only key to your data. If you forget it, you can reset your password using the "Forgot password?" link, but <strong>all your existing transaction data will be permanently and irreversibly deleted</strong>. You will need to re-import your bank statements. There is no way to recover the old data. We strongly recommend storing your password in a password manager.</p>
+
+  <h3>Can two family members use the same account?</h3>
+  <p>Yes. fintrack supports multi-member households. Import statements for different family members under the same account. If your CSV includes a "Card Member" column (e.g. AmEx), fintrack automatically assigns transactions to each member. You can also use the Members page to manage household members manually.</p>
+
+  <h3>How do I delete my account?</h3>
+  <p>Contact us at <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a> to request account deletion. All your data, including encrypted transactions, will be permanently removed from our servers.</p>
+
+  <h3>Is my data backed up?</h3>
+  <p>Your encrypted data is stored on AWS infrastructure with standard redundancy. However, since fintrack uses zero-knowledge encryption, we cannot recover your data if you lose your password. We recommend periodically exporting your data using the Export feature (available on Household and Premium plans) and storing the export securely.</p>
+
+</div>
+
+<footer>
+  &copy; 2026 Nudge Labs LLC &nbsp;&middot;&nbsp; fintrack &nbsp;&middot;&nbsp;
+  <a href="https://fintrack.nudgelabs.app">fintrack.nudgelabs.app</a>
+</footer>
+
+</body>
+</html>

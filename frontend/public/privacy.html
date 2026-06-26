@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — fintrack by Nudge Labs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #f8f9fc;
+    }
+
+    header {
+      background: #2563EB;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: #fff;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    header span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-left: 4px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 48px auto;
+      padding: 0 24px 80px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .meta strong { color: #374151; }
+
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin: 40px 0 12px;
+    }
+
+    h2:first-of-type { margin-top: 0; }
+
+    p { margin-bottom: 14px; color: #374151; }
+
+    ul {
+      margin: 8px 0 14px 20px;
+      color: #374151;
+    }
+
+    ul li { margin-bottom: 6px; }
+
+    .highlight {
+      background: #eff6ff;
+      border-left: 4px solid #2563EB;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+      font-size: 15px;
+      color: #1e40af;
+    }
+
+    .contact-box {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 40px;
+    }
+
+    .contact-box h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #1a1a2e;
+    }
+
+    .contact-box a {
+      color: #2563EB;
+      text-decoration: none;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+      padding: 32px;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ft</div>
+  <div>
+    <h1>fintrack <span>by Nudge Labs LLC</span></h1>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="meta">
+    <strong>Privacy Policy</strong> &nbsp;·&nbsp;
+    Effective date: June 16, 2026 &nbsp;·&nbsp;
+    Last updated: June 16, 2026
+  </div>
+
+  <div class="highlight">
+    fintrack is built on a zero-knowledge architecture. Your financial data is encrypted on your device before it ever reaches our servers. We cannot read, access, or share your transaction data — ever.
+  </div>
+
+  <h2>1. Who We Are</h2>
+  <p>fintrack is a personal finance tracking application developed and operated by <strong>Nudge Labs LLC</strong>, a Georgia limited liability company. We can be reached at <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a>.</p>
+
+  <h2>2. Information We Collect</h2>
+  <p>We collect only what is necessary to provide the service:</p>
+  <ul>
+    <li><strong>Account information:</strong> your email address and a cryptographic hash of your password. We never store your password in plain text.</li>
+    <li><strong>Encrypted financial data:</strong> your transaction records, categories, and budgets — encrypted end-to-end using your password as the key. We have no ability to decrypt this data.</li>
+    <li><strong>Subscription information:</strong> your plan tier (Free, Household, or Premium) and subscription status.</li>
+    <li><strong>Usage metadata:</strong> basic server logs including request timestamps, IP addresses, and HTTP status codes, retained for up to 30 days for security and debugging purposes.</li>
+  </ul>
+  <p>We do not collect device identifiers, location data, advertising IDs, or any behavioral analytics.</p>
+
+  <h2>3. Zero-Knowledge Encryption</h2>
+  <p>fintrack uses end-to-end encryption. Your financial data is encrypted on your device using NaCl SecretBox with Argon2id key derivation before transmission to our servers. Your encryption key is derived from your password and is never transmitted or stored by us.</p>
+  <p>This means: if you forget your password, your encrypted data cannot be recovered. There is no "forgot password" pathway that gives us access to your data.</p>
+
+  <h2>4. How We Use Your Information</h2>
+  <ul>
+    <li>To authenticate your account and provide access to the application</li>
+    <li>To store and retrieve your encrypted financial data</li>
+    <li>To manage your subscription and process payments (via Stripe)</li>
+    <li>To send transactional emails such as MFA codes and account notifications</li>
+    <li>To maintain security and prevent abuse</li>
+  </ul>
+  <p>We do not use your information for advertising, profiling, or sale to third parties.</p>
+
+  <h2>5. Data Sharing</h2>
+  <p>We do not sell, rent, or trade your personal information. We share data only with the following service providers who assist in operating fintrack:</p>
+  <ul>
+    <li><strong>Amazon Web Services (AWS):</strong> cloud infrastructure and encrypted data storage (us-east-1 region)</li>
+    <li><strong>Stripe:</strong> payment processing for paid subscriptions</li>
+    <li><strong>Email service provider:</strong> for delivery of transactional emails (MFA codes, account notices)</li>
+  </ul>
+  <p>All service providers are contractually required to protect your data and may not use it for their own purposes.</p>
+
+  <h2>6. Data Retention</h2>
+  <p>We retain your account and encrypted data for as long as your account is active. Free tier accounts with no activity for 24 consecutive months may be deleted after notice. You may delete your account and all associated data at any time by contacting us at <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a>.</p>
+
+  <h2>7. Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li>Access the personal information we hold about you</li>
+    <li>Request correction of inaccurate information</li>
+    <li>Request deletion of your account and data</li>
+    <li>Export your data in CSV format at any time using the Export feature in the app</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a>.</p>
+
+  <h2>8. Security</h2>
+  <p>We implement industry-standard security measures including TLS encryption in transit, encrypted storage at rest, and zero-knowledge architecture that ensures your financial data is inaccessible even to us. Access to our production systems is restricted and logged.</p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>fintrack is not directed at children under 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us and we will delete it promptly.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this policy from time to time. We will notify registered users by email of any material changes at least 30 days before they take effect. Continued use of fintrack after that date constitutes acceptance of the updated policy.</p>
+
+  <h2>11. Contact Us</h2>
+  <div class="contact-box">
+    <h3>Nudge Labs LLC</h3>
+    <p>
+      Email: <a href="mailto:nudgelabsllc@gmail.com">nudgelabsllc@gmail.com</a><br>
+      Website: <a href="https://fintrack.nudgelabs.app">https://fintrack.nudgelabs.app</a><br>
+      State of incorporation: Georgia, USA
+    </p>
+  </div>
+
+</div>
+
+<footer>
+  &copy; 2026 Nudge Labs LLC &nbsp;·&nbsp; fintrack &nbsp;·&nbsp;
+  <a href="https://fintrack.nudgelabs.app" style="color:#9ca3af;">fintrack.nudgelabs.app</a>
+</footer>
+
+</body>
+</html>
