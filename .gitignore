@@ -55,3 +55,4 @@ test_output/
 *.xlsx
 *.csv
 .ipynb_checkpoints/
+.cache/fontconfig/
