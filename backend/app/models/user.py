@@ -27,7 +27,7 @@ class User(Base):
     email         = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(Text, nullable=False)
     is_active      = Column(Boolean, nullable=False, default=True)
-    plan           = Column(String, nullable=False, default='free')
+    plan           = Column(String, nullable=False, default='household')
     plan_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     # MFA fields
