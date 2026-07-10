@@ -1,5 +1,9 @@
 {
   "appId": "com.nudgelabs.fintrack",
   "appName": "Fintrack",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "url": "https://fintrack.nudgelabs.app",
+    "cleartext": false
+  }
 }
