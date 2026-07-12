@@ -1,10 +1,11 @@
 // ============================================================
 // fintrack — App root component
 // File: src/App.jsx
-// Version: 1.4 — 2026-04-06
+// Version: 1.5 — 2026-07-10
 // Changes:
 //   v1.3  2026-04-05  Added Budgets page
 //   v1.4  2026-04-06  Added Register and MFASetup flows
+//   v1.5  2026-07-10  Mobile responsive: hamburger menu, slide-out sidebar
 // ============================================================
 
 import React, { useState } from 'react'
@@ -27,6 +28,7 @@ import Budgets        from './pages/Budgets'
 import Export         from './pages/Export'
 import ResetPassword  from './pages/ResetPassword'
 import Upgrade        from './pages/Upgrade'
+import { Menu, TrendingUp } from 'lucide-react'
 
 const PAGES = {
   dashboard:      Dashboard,
@@ -52,6 +54,7 @@ function AppInner() {
   const [page, setPage]       = useState('dashboard')
   const [year, setYear]       = useState(2026)
   const [showRegister, setShowRegister] = useState(false)
+  const [sidebarOpen, setSidebarOpen]   = useState(false)
 
   const { showWarn, countdown, stayLoggedIn } = useSessionTimeout(isLoggedIn, logout)
 
@@ -83,8 +86,6 @@ function AppInner() {
       return (
         <Register
           onRegistered={(loginData, pwd) => {
-            // After registration, trigger MFA setup
-            // loginData.email comes from the login response after registration
             startMFASetup(loginData.access_token, loginData.email || '', pwd)
             setShowRegister(false)
           }}
@@ -102,12 +103,37 @@ function AppInner() {
   function handleNavigate(newPage, newYear) {
     if (newPage) setPage(newPage)
     if (newYear) setYear(newYear)
+    setSidebarOpen(false)
   }
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar active={page} onNavigate={handleNavigate} />
-      <main className="flex-1 p-6 overflow-auto">
+      {/* Mobile top bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 md:hidden
+                      bg-white dark:bg-gray-900 border-b border-gray-200
+                      dark:border-gray-700 px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
+                     text-gray-600 dark:text-gray-400"
+          aria-label="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
+          <TrendingUp size={14} className="text-white" />
+        </div>
+        <span className="font-bold text-gray-900 dark:text-white text-base">fintrack</span>
+      </div>
+
+      <Sidebar
+        active={page}
+        onNavigate={handleNavigate}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <main className="flex-1 p-4 md:p-6 overflow-auto pt-16 md:pt-6">
         <div className="max-w-6xl mx-auto">
           <PageComponent year={year} />
         </div>

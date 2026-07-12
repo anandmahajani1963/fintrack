@@ -1,15 +1,17 @@
 // ============================================================
 // fintrack — Sidebar navigation
 // File: src/components/Sidebar.jsx
-// Version: 1.2 — 2026-04-05
-// Changes: Added Members, Reconciliation, Import nav items
+// Version: 1.3 — 2026-07-10
+// Changes:
+//   v1.2  2026-04-05  Added Members, Reconciliation, Import nav items
+//   v1.3  2026-07-10  Mobile responsive: slide-out overlay with backdrop
 // ============================================================
 
 import React from 'react'
 import {
   LayoutDashboard, PieChart, CalendarDays,
   List, LogOut, TrendingUp, Users,
-  ClipboardCheck, Upload, DollarSign, Download, Zap, BookOpen
+  ClipboardCheck, Upload, DollarSign, Download, Zap, BookOpen, X
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
@@ -23,24 +25,32 @@ const NAV_ITEMS = [
   { id: 'budgets',        label: 'Budgets',        icon: DollarSign      },
   { id: 'reconciliation', label: 'Reconciliation', icon: ClipboardCheck  },
   { id: 'import',         label: 'Import Data',    icon: Upload          },
-  { id: 'export',         label: 'Export',         icon: Download        },
+  { id: 'export',         label: 'Export',          icon: Download        },
   { id: 'upgrade',        label: 'Upgrade Plan',   icon: Zap             },
 ]
 
-export default function Sidebar({ active, onNavigate }) {
+export default function Sidebar({ active, onNavigate, isOpen, onClose }) {
   const { user, logout, plan } = useAuth()
 
-  return (
-    <aside className="w-56 flex-shrink-0 flex flex-col
-                      bg-white dark:bg-gray-900
-                      border-r border-gray-200 dark:border-gray-700
-                      h-screen sticky top-0">
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b
+  const sidebarContent = (
+    <>
+      <div className="flex items-center justify-between px-5 py-5 border-b
                       border-gray-200 dark:border-gray-700">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-          <TrendingUp size={16} className="text-white" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <TrendingUp size={16} className="text-white" />
+          </div>
+          <span className="font-bold text-gray-900 dark:text-white text-lg">fintrack</span>
         </div>
-        <span className="font-bold text-gray-900 dark:text-white text-lg">fintrack</span>
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="md:hidden p-1.5 rounded-lg hover:bg-gray-100
+                     dark:hover:bg-gray-800 text-gray-400"
+          aria-label="Close menu"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <div className="px-4 pt-4">
@@ -111,6 +121,36 @@ export default function Sidebar({ active, onNavigate }) {
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar — always visible */}
+      <aside className="hidden md:flex w-56 flex-shrink-0 flex-col
+                        bg-white dark:bg-gray-900
+                        border-r border-gray-200 dark:border-gray-700
+                        h-screen sticky top-0">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Mobile sidebar — slide-out overlay */}
+      <aside className={`fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col
+                         bg-white dark:bg-gray-900
+                         border-r border-gray-200 dark:border-gray-700
+                         transform transition-transform duration-200 ease-in-out
+                         md:hidden
+                         ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {sidebarContent}
+      </aside>
+    </>
   )
 }
