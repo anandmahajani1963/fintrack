@@ -25,6 +25,7 @@ export default function Login({ onRegister }) {
   const [step, setStep]         = useState('login')  // login | mfa | recover | recover_verify | forgot
   const [mfaType, setMfaType]   = useState('')
   const [pendingToken, setPendingToken] = useState('')
+  const [pendingPlan, setPendingPlan]     = useState('free')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
@@ -36,6 +37,7 @@ export default function Login({ onRegister }) {
       // login() in AuthContext handles mfa_required flag
       if (data.mfa_required) {
         setPendingToken(data.access_token)
+        setPendingPlan(data.plan || 'free')
         setMfaType(data.mfa_type)
         // Send OTP if email MFA
         if (data.mfa_type === 'email') {
@@ -71,7 +73,7 @@ export default function Login({ onRegister }) {
       const data = await r.json()
       if (!r.ok) throw new Error(data.detail || 'Invalid code')
       // MFA verified — set user and password directly without re-triggering MFA check
-      completeMFALogin(email, password, { user_id: '', email })
+      completeMFALogin(email, password, { user_id: '', email, plan: pendingPlan })
     } catch (err) {
       setError(err.message)
     }
