@@ -65,13 +65,14 @@ app.add_middleware(
     expose_headers=["X-Fintrack-Password"],
 )
 
-from app.routers import auth, transactions, analytics, budget, mfa, export
+from app.routers import auth, transactions, analytics, budget, mfa, export, stripe_billing
 app.include_router(auth.router,         prefix="/api/v1/auth",         tags=["auth"])
 app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["transactions"])
 app.include_router(analytics.router,    prefix="/api/v1/analytics",    tags=["analytics"])
 app.include_router(budget.router,       prefix="/api/v1/budget",       tags=["budget"])
 app.include_router(mfa.router,         prefix="/api/v1/mfa",         tags=["mfa"])
 app.include_router(export.router,      prefix="/api/v1/export",      tags=["export"])
+app.include_router(stripe_billing.router, prefix="/api/v1/stripe", tags=["stripe"])
 
 
 @app.get("/health", tags=["system"])
