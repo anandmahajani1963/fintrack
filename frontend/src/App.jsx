@@ -65,6 +65,29 @@ function AppInner() {
     return () => window.removeEventListener('navigate', handler)
   }, [])
 
+  // Detect Stripe checkout redirect and refresh plan
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("upgrade") === "success") {
+      // Clean the URL
+      window.history.replaceState({}, "", window.location.pathname)
+      // Refresh token to get updated plan from backend
+      fetch("/api/v1/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: sessionStorage.getItem("refresh_token") || "" })
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (d && d.plan) {
+            // Force page reload to pick up new plan
+            window.location.reload()
+          }
+        })
+        .catch(() => {})
+    }
+  }, [])
+
   // Show password reset page when URL contains /reset-password
   if (window.location.pathname === '/reset-password') {
     return <ResetPassword />
