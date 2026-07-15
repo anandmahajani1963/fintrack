@@ -46,7 +46,7 @@ router = APIRouter()
 def _seed_categories_for_user(user_id, db: Session):
     """Copy default_categories into the user's categories table on first registration."""
     defaults = db.execute(
-        text("SELECT name, is_essential, color_code, keywords, sort_order FROM default_categories")
+        text("SELECT name, subcategory, is_essential, color_code, keywords, sort_order FROM default_categories")
     ).fetchall()
 
     for row in defaults:
@@ -57,6 +57,7 @@ def _seed_categories_for_user(user_id, db: Session):
             color_code   = row.color_code,
             keywords     = list(row.keywords),
             sort_order   = row.sort_order,
+            subcategory  = getattr(row, "subcategory", None),
         )
         db.add(cat)
 
@@ -114,7 +115,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 
@@ -155,7 +156,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 
@@ -194,7 +195,7 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 

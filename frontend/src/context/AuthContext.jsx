@@ -28,9 +28,10 @@ export function AuthProvider({ children }) {
   const [plan, setPlan]               = useState('free')
 
   useEffect(() => {
-    auth.tryRestoreSession().then(restored => {
-      if (restored) {
+    auth.tryRestoreSession().then(data => {
+      if (data) {
         setUser({ email: auth.email() })
+        setPlan(data.plan || 'free')
         setNeedsPassword(true)
       }
       setRestoring(false)

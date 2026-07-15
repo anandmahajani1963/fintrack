@@ -38,7 +38,7 @@ export const auth = {
   async tryRestoreSession() {
     // Called on app startup — silently restore session from refresh token
     const refreshToken = sessionStorage.getItem('refresh_token')
-    if (!refreshToken) return false
+    if (!refreshToken) return null
     try {
       const r = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
         method:  'POST',
@@ -47,16 +47,16 @@ export const auth = {
       })
       if (!r.ok) {
         sessionStorage.removeItem('refresh_token')
-        return false
+        return null
       }
       const data = await r.json()
       _token = data.access_token
       _email = data.email
       sessionStorage.setItem('refresh_token', data.refresh_token)
-      return true
+      return data
     } catch {
       sessionStorage.removeItem('refresh_token')
-      return false
+      return null
     }
   },
 
