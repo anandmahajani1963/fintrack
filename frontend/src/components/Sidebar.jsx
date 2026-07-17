@@ -120,6 +120,12 @@ export default function Sidebar({ active, onNavigate, isOpen, onClose }) {
           <LogOut size={15} />
           Sign out
         </button>
+        <a href="/delete.html" target="_blank" rel="noopener noreferrer"
+           className="flex items-center gap-2 text-xs text-gray-400
+                      dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400
+                      transition-colors mt-2">
+          Delete account
+        </a>
       </div>
     </>
   )

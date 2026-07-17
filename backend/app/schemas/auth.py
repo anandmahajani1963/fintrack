@@ -37,7 +37,6 @@ class TokenResponse(BaseModel):
     email:         str
     mfa_required:  bool = False
     mfa_type:      str  = "none"
-    plan:          str  = "free"
 
 
 class RefreshRequest(BaseModel):
