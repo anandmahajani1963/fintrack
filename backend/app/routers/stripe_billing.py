@@ -27,10 +27,10 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://fintrack.nudgelabs.app")
 
 # ── Price ID mapping ────────────────────────────────────────
 PRICE_IDS = {
-    "household_monthly": "price_1Tt6le7M4aL15LRdaclcsDb4",
-    "household_annual":  "price_1Tt6nK7M4aL15LRdLjPS6xYK",
-    "premium_monthly":   "price_1Tt6qj7M4aL15LRdQxywE1wb",
-    "premium_annual":    "price_1Tt6sd7M4aL15LRdJ8yJwELZ",
+    "household_monthly": "price_1TuG1J70wWEY3XB2YEmdnPFi",
+    "household_annual":  "price_1TuG1J70wWEY3XB2b11Vo4Iz",
+    "premium_monthly":   "price_1TuG1H70wWEY3XB2hZeOp2SN",
+    "premium_annual":    "price_1TuG1G70wWEY3XB2zTDFEx7Z",
 }
 
 # Reverse lookup: price_id -> plan name
