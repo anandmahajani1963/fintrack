@@ -114,7 +114,7 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 
@@ -155,7 +155,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 
@@ -194,7 +194,7 @@ def refresh_token(req: RefreshRequest, db: Session = Depends(get_db)):
         "email":         user.email,
         "mfa_required":  mfa_required,
         "mfa_type":      getattr(user, 'mfa_type', 'none'),
-        "plan":          getattr(user, 'plan', 'household'),
+        "plan":          getattr(user, 'plan', 'free'),
         "token_type":    "bearer",
     }
 
