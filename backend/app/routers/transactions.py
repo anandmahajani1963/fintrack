@@ -116,12 +116,16 @@ def import_csv(
 
     # Free tier: max 1 account
     from app.services.auth import get_plan_features
-    features = get_plan_features(getattr(current_user, 'plan', 'household'))
-    if features['max_accounts'] is not None:
+    features = get_plan_features(getattr(current_user, 'plan', 'free'))
+    if features["max_accounts"] is not None:
+        already_has_card = db.query(Account).filter(
+            Account.user_id == current_user.id,
+            Account.provider == account_provider
+        ).count() > 0
         existing_accounts = db.query(Account).filter(
             Account.user_id == current_user.id
         ).count()
-        if existing_accounts >= features['max_accounts']:
+        if not already_has_card and existing_accounts >= features["max_accounts"]:
             raise HTTPException(
                 status_code=403,
                 detail={
