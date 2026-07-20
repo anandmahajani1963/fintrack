@@ -29,6 +29,7 @@ class User(Base):
     is_active      = Column(Boolean, nullable=False, default=True)
     plan           = Column(String, nullable=False, default='free')
     plan_expires_at = Column(DateTime(timezone=True), nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
 
     # MFA fields
     mfa_type      = Column(String, nullable=False, default='none')
