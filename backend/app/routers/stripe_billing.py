@@ -63,6 +63,7 @@ def create_checkout_session(
 
     try:
         # Check if user already has a Stripe customer ID
+        is_returning = bool(getattr(user, 'stripe_customer_id', None))
         customer_id = getattr(user, 'stripe_customer_id', None)
 
         if not customer_id:
@@ -82,7 +83,7 @@ def create_checkout_session(
             line_items=[{"price": price_id, "quantity": 1}],
             mode="subscription",
             subscription_data={
-                "trial_period_days": 14,
+                **({"trial_period_days": 14} if not is_returning else {}),
                 "metadata": {
                     "fintrack_user_id": str(user.id),
                     "plan": PRICE_TO_PLAN.get(price_id, "household"),
