@@ -15,6 +15,7 @@ export default function Register({ onRegistered, onBack }) {
   const [error, setError]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [acknowledged, setAcknowledged] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   function validate() {
     if (!email)    return 'Email is required'
@@ -23,6 +24,7 @@ export default function Register({ onRegistered, onBack }) {
     if (!/[0-9]/.test(password)) return 'Password must contain a number'
     if (password !== confirm) return 'Passwords do not match'
     if (!acknowledged) return 'Please acknowledge the password warning'
+    if (!termsAccepted) return 'Please accept the Terms of Service'
     return null
   }
 
@@ -162,6 +164,19 @@ export default function Register({ onRegistered, onBack }) {
               I understand that my password <strong>cannot be recovered</strong>. 
               If I forget my password, my financial data will be permanently deleted 
               and I will start fresh.
+            </label>
+          </div>
+
+          <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/50
+                          border border-gray-200 dark:border-gray-700
+                          rounded-lg px-3 py-3">
+            <input type="checkbox" id="terms" checked={termsAccepted}
+                   onChange={e => setTermsAccepted(e.target.checked)}
+                   className="mt-0.5 h-4 w-4 accent-blue-600 cursor-pointer flex-shrink-0" />
+            <label htmlFor="terms" className="text-xs text-gray-600 dark:text-gray-400
+                                              cursor-pointer leading-relaxed">
+              I agree to the <a href="/terms.html" target="_blank" className="text-blue-600 underline">Terms of Service</a> and
+              <a href="/privacy.html" target="_blank" className="text-blue-600 underline">Privacy Policy</a>.
             </label>
           </div>
 
