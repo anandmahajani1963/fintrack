@@ -80,6 +80,7 @@ class Account(Base):
     last_four     = Column(String, nullable=True)
     is_active      = Column(Boolean, nullable=False, default=True)
     source_type   = Column(String, nullable=False, default='csv_import')
+    csv_format    = Column(String, nullable=True)
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
 
     user         = relationship("User",        back_populates="accounts")

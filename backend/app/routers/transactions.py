@@ -59,7 +59,7 @@ def _get_thresholds(user_id, db: Session) -> dict:
 
 def _get_or_create_account(
     user_id, provider: str, member_name: str,
-    encryption_key: bytes, db: Session
+    encryption_key: bytes, csv_format: str, db: Session
 ) -> Account:
     # Use member_name_plain for reliable lookup — no decryption needed
     acc = db.query(Account).filter(
@@ -78,6 +78,7 @@ def _get_or_create_account(
         member_name_plain = member_name,
         last_four         = encrypt("", encryption_key),
         source_type       = "csv_import",
+        csv_format        = csv_format,
     )
     db.add(acc)
     db.flush()
@@ -118,14 +119,14 @@ def import_csv(
     from app.services.auth import get_plan_features
     features = get_plan_features(getattr(current_user, 'plan', 'free'))
     if features["max_accounts"] is not None:
-        already_has_card = db.query(Account).filter(
+        already_has_format = db.query(Account).filter(
             Account.user_id == current_user.id,
-            Account.provider == account_provider
+            Account.csv_format == provider
         ).count() > 0
-        existing_accounts = db.query(Account).filter(
+        distinct_formats = db.query(Account.csv_format).filter(
             Account.user_id == current_user.id
-        ).count()
-        if not already_has_card and existing_accounts >= features["max_accounts"]:
+        ).distinct().count()
+        if not already_has_format and distinct_formats >= features["max_accounts"]:
             raise HTTPException(
                 status_code=403,
                 detail={
@@ -158,7 +159,7 @@ def import_csv(
     for row in result.rows:
         if row.member_name not in accounts_cache:
             accounts_cache[row.member_name] = _get_or_create_account(
-                current_user.id, account_provider, row.member_name, enc_key, db
+                current_user.id, account_provider, row.member_name, enc_key, provider, db
             )
         account = accounts_cache[row.member_name]
 
