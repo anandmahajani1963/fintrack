@@ -96,10 +96,16 @@ def import_csv(
     password:      str = Form(..., description="Your fintrack password"),
 ):
     provider = provider.lower().strip()
+    # Map bank names to parsing format
+    BANK_TO_FORMAT = {"citi": "debit_credit", "amex": "debit_credit", "discover": "debit_credit",
+                      "capital_one": "debit_credit", "chase": "amount_negative",
+                      "boa": "amount_negative", "wellsfargo": "amount_negative"}
+    parse_format = BANK_TO_FORMAT.get(provider, provider)
     # Use nickname as the stored provider label if provided
     account_provider = provider_name.strip() if provider_name.strip() else provider
     VALID_FORMATS = ("debit_credit", "amount_negative", "amount_positive",
-                     "citi", "amex", "chase", "chase_checking")
+                     "citi", "amex", "chase", "chase_checking",
+                     "discover", "capital_one", "boa", "wellsfargo")
     if provider not in VALID_FORMATS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -143,7 +149,7 @@ def import_csv(
     result = parse_csv(
         file_bytes      = file_bytes,
         filename        = file.filename,
-        provider        = provider,
+        provider        = parse_format,
         encryption_key  = enc_key,
         user_categories = user_categories,
         thresholds      = thresholds,

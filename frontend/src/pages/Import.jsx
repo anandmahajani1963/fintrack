@@ -14,34 +14,17 @@ import { Upload, CheckCircle, AlertCircle, FileText, X } from 'lucide-react'
 const API_BASE = ''
 // CSV format options — covers all major US credit cards and banks
 const FORMATS = [
-  {
-    value: 'debit_credit',
-    label: 'Debit/Credit columns',
-    desc:  'Citi, AmEx, Discover, Capital One',
-    hint:  'Separate Debit and Credit columns',
-    auto:  ['citi', 'amex', 'discover', 'capital'],
-  },
-  {
-    value: 'amount_negative',
-    label: 'Amount column (negative charges)',
-    desc:  'Chase, Bank of America, Wells Fargo, checking accounts',
-    hint:  'Single Amount column — purchases are negative',
-    auto:  ['chase', 'boa', 'bofa', 'bank_of_america', 'wellsfargo', 'wf_'],
-  },
-  {
-    value: 'amount_positive',
-    label: 'Amount column (positive charges)',
-    desc:  'Some regional banks and older exports',
-    hint:  'Single Amount column — purchases are positive',
-    auto:  [],
-  },
-  {
-    value: 'chase_checking',
-    label: 'Chase Checking Account',
-    desc:  'Chase bank checking account statements',
-    hint:  'Chase checking — Details/Posting Date/Description/Amount columns',
-    auto:  ['chase_check', 'checking'],
-  },
+  { value: "citi",            label: "Citi",                     hint: "Debit/Credit columns", auto: ["citi"] },
+  { value: "amex",            label: "American Express",         hint: "Debit/Credit columns", auto: ["amex"] },
+  { value: "discover",        label: "Discover",                 hint: "Debit/Credit columns", auto: ["discover"] },
+  { value: "capital_one",     label: "Capital One",              hint: "Debit/Credit columns", auto: ["capital"] },
+  { value: "chase",           label: "Chase Credit Card",        hint: "Amount column — negative charges", auto: ["chase"] },
+  { value: "boa",             label: "Bank of America",          hint: "Amount column — negative charges", auto: ["boa", "bofa", "bank_of_america"] },
+  { value: "wellsfargo",      label: "Wells Fargo",              hint: "Amount column — negative charges", auto: ["wellsfargo", "wf_"] },
+  { value: "chase_checking",  label: "Chase Checking/Savings",   hint: "Chase checking — Details/Posting Date columns", auto: ["chase_check", "checking"] },
+  { value: "debit_credit",    label: "Other (Debit/Credit cols)", hint: "Generic — separate Debit and Credit columns", auto: [] },
+  { value: "amount_negative", label: "Other (Negative charges)",  hint: "Generic — single Amount column, purchases negative", auto: [] },
+  { value: "amount_positive", label: "Other (Positive charges)",  hint: "Generic — single Amount column, purchases positive", auto: [] },
 ]
 
 export default function Import() {
