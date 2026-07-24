@@ -75,6 +75,10 @@ export const auth = {
     return data
   },
 
+  setToken(token, refreshToken) {
+    _token = token
+    if (refreshToken) sessionStorage.setItem("refresh_token", refreshToken)
+  },
   logout() {
     _token = null
     _email = null

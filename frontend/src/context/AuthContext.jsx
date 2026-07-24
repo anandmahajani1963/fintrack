@@ -65,6 +65,7 @@ export function AuthProvider({ children }) {
   const completeMFASetup = useCallback(() => {
     console.log("completeMFASetup called, token:", mfaSetupToken?.email, "pwd length:", mfaSetupToken?.pwd?.length)
     if (mfaSetupToken) {
+      auth.setToken(mfaSetupToken.token)
       setUser({ email: mfaSetupToken.email })
       setPassword(mfaSetupToken.pwd || '')
       setNeedsPassword(false)
