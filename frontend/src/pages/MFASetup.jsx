@@ -238,12 +238,12 @@ export default function MFASetup({ token, email, onComplete }) {
                 MFA enabled!
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Your account is now protected with two-factor authentication.
+                MFA setup complete! Please log in to continue.
               </p>
               <button onClick={onComplete}
                       className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700
                                  text-white font-medium text-sm">
-                Continue to fintrack
+                Continue to login
               </button>
             </div>
           )}
