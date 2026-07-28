@@ -7,6 +7,7 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from functools import lru_cache
+from app.services.secrets import get_secret
 
 
 class Settings(BaseSettings):
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     DB_PORT:     int = 5432
     DB_NAME:     str = "fintrack"
     DB_USER:     str = "fintrack"
-    DB_PASSWORD: str
+    DB_PASSWORD: str = ""
 
     # API
     API_HOST:    str = "0.0.0.0"
@@ -49,7 +50,7 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self) -> str:
         return (
-            f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}"
+            f"postgresql://{self.DB_USER}:{self.DB_PASSWORD or get_secret('fintrack/db-password', 'DB_PASSWORD')}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 

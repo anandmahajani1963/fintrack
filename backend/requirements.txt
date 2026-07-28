@@ -43,3 +43,6 @@ pytz==2024.2
 
 # Payments
 stripe==11.5.0
+
+# AWS SDK
+boto3==1.35.0

@@ -8,6 +8,7 @@ import os
 import json
 import logging
 import stripe
+from app.services.secrets import get_secret
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -21,8 +22,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # ── Stripe configuration ────────────────────────────────────
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+stripe.api_key = get_secret("fintrack/stripe-secret-key", "STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = get_secret("fintrack/stripe-webhook-secret", "STRIPE_WEBHOOK_SECRET")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://fintrack.nudgelabs.app")
 
 # ── Price ID mapping ────────────────────────────────────────
