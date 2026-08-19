@@ -8,6 +8,11 @@
 #   PUT  /api/v1/budget/thresholds        upsert a threshold
 #   DELETE /api/v1/budget/thresholds/{id} delete a threshold
 #   GET  /api/v1/budget/status            actuals vs thresholds
+#
+# Change history:
+# 2026-08-19 — Fix free-tier budget leak: import require_plan so the
+#   require_plan(...) gate in PUT/DELETE /thresholds actually runs
+#   (was raising NameError -> 500).
 # ============================================================
 
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -20,7 +25,7 @@ import uuid
 from app.database import get_db
 from app.models.user import UserKey
 from app.models.transaction import ExpenseThreshold
-from app.services.auth import CurrentUser
+from app.services.auth import CurrentUser, require_plan
 
 router = APIRouter()
 
