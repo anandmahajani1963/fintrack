@@ -22,8 +22,15 @@ async function apiFetch(path, token, options = {}) {
     }
   })
   if (!r.ok) {
-    const err = await r.json().catch(() => ({ detail: r.statusText }))
-    throw new Error(err.detail || `Error ${r.status}`)
+    const body = await r.json().catch(() => ({ detail: r.statusText }))
+    const detail = body.detail
+    const message = typeof detail === 'string'
+      ? detail
+      : (detail?.message || `Error ${r.status}`)
+    const e = new Error(message)
+    e.status = r.status
+    e.detail = detail
+    throw e
   }
   return r.json()
 }
@@ -64,6 +71,7 @@ export default function Budgets({ year }) {
   const [categories, setCategories] = useState([])
   const [error, setError]       = useState('')
   const [token, setToken]       = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   // New threshold form
   const [showForm, setShowForm] = useState(false)
@@ -124,7 +132,7 @@ export default function Budgets({ year }) {
     if (!form.category_name || !form.threshold) {
       setFormError('Category and amount are required'); return
     }
-    setSaving(true); setFormError('')
+    setSaving(true); setFormError(''); setShowUpgrade(false)
     try {
       await apiFetch('/api/v1/budget/thresholds', token, {
         method: 'PUT',
@@ -140,6 +148,7 @@ export default function Budgets({ year }) {
       loadAll()
     } catch (err) {
       setFormError(err.message)
+      setShowUpgrade(err.detail?.error === 'plan_required')
     }
     setSaving(false)
   }
@@ -169,7 +178,7 @@ export default function Budgets({ year }) {
           </p>
         </div>
         <button
-          onClick={() => { setShowForm(f => !f); setFormError('') }}
+          onClick={() => { setShowForm(f => !f); setFormError(''); setShowUpgrade(false) }}
           className="flex items-center gap-2 px-4 py-2 rounded-lg
                      bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
         >
@@ -272,8 +281,18 @@ export default function Budgets({ year }) {
             </div>
 
             {formError && (
-              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50
-                            dark:bg-red-900/20 rounded-lg px-3 py-2">{formError}</p>
+              <div className="text-sm text-red-600 dark:text-red-400 bg-red-50
+                              dark:bg-red-900/20 rounded-lg px-3 py-2 space-y-2">
+                <p>{formError}</p>
+                {showUpgrade && (
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'upgrade' }))}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
+                               bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium">
+                    Upgrade Plan
+                  </button>
+                )}
+              </div>
             )}
 
             <div className="flex gap-3">

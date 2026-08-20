@@ -116,8 +116,15 @@ async function apiFetch(path, options = {}, password = null) {
   }
 
   if (!r.ok) {
-    const err = await r.json().catch(() => ({ detail: r.statusText }))
-    throw new Error(err.detail || `API error ${r.status}`)
+    const body = await r.json().catch(() => ({ detail: r.statusText }))
+    const detail = body.detail
+    const message = typeof detail === 'string'
+      ? detail
+      : (detail?.message || `API error ${r.status}`)
+    const e = new Error(message)
+    e.status = r.status
+    e.detail = detail
+    throw e
   }
 
   return r.json()

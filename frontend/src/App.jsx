@@ -132,9 +132,12 @@ function AppInner() {
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 md:hidden
-                      bg-white dark:bg-gray-900 border-b border-gray-200
-                      dark:border-gray-700 px-4 py-3 flex items-center gap-3">
+      <div 
+        className="fixed top-0 left-0 right-0 z-30 md:hidden
+                   bg-white dark:bg-gray-900 border-b border-gray-200
+                   dark:border-gray-700 px-4 py-3 flex items-center gap-3"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 0.75rem)' }}
+      >
         <button
           onClick={() => setSidebarOpen(true)}
           className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
@@ -156,7 +159,8 @@ function AppInner() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <main className="flex-1 p-4 md:p-6 overflow-auto pt-16 md:pt-6">
+      <main className="flex-1 p-4 md:p-6 overflow-auto
+                       pt-[calc(4rem+env(safe-area-inset-top))] md:pt-6">
         <div className="max-w-6xl mx-auto">
           <PageComponent year={year} />
         </div>

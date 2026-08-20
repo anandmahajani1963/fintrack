@@ -14,9 +14,10 @@ export default function Export({ year }) {
   const [loading, setLoading] = useState(null)  // 'excel' | 'pdf' | null
   const [done, setDone]       = useState(null)
   const [error, setError]     = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   async function handleExport(format) {
-    setLoading(format); setError(''); setDone(null)
+    setLoading(format); setError(''); setDone(null); setShowUpgrade(false)
     try {
       // Get fresh token via refresh
       const rt = sessionStorage.getItem('refresh_token')
@@ -36,8 +37,15 @@ export default function Export({ year }) {
       })
 
       if (!r.ok) {
-        const err = await r.json().catch(() => ({ detail: r.statusText }))
-        throw new Error(err.detail || `Export failed (${r.status})`)
+        const body = await r.json().catch(() => ({ detail: r.statusText }))
+        const detail = body.detail
+        const message = typeof detail === 'string'
+          ? detail
+          : (detail?.message || `Export failed (${r.status})`)
+        const e = new Error(message)
+        e.status = r.status
+        e.detail = detail
+        throw e
       }
 
       // Trigger browser download
@@ -54,6 +62,7 @@ export default function Export({ year }) {
       setDone(format)
     } catch (err) {
       setError(err.message)
+      setShowUpgrade(err.detail?.error === 'plan_required')                  // new line
     }
     setLoading(null)
   }
@@ -132,7 +141,7 @@ export default function Export({ year }) {
               <h2 className="font-semibold text-gray-900 dark:text-white text-lg">
                 PDF Report
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray:400 mt-1 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">
                 Formatted landscape report, ready to print or share.
               </p>
               <div className="space-y-1 mb-5">
@@ -175,8 +184,16 @@ export default function Export({ year }) {
 
       {error && (
         <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border
-                        border-red-200 dark:border-red-800 p-4">
+                        border-red-200 dark:border-red-800 p-4 space-y-2">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          {showUpgrade && (
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'upgrade' }))}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg
+                         bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium">
+              Upgrade Plan
+            </button>
+          )}
         </div>
       )}
 
