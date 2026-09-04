@@ -255,7 +255,8 @@ def forgot_password(
             from email.mime.text import MIMEText
             from email.mime.multipart import MIMEMultipart
 
-            reset_url = f"https://fintrack.local:32606/reset-password?token={token}"
+            #reset_url = f"https://fintrack.local:32606/reset-password?token={token}"
+            reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
 
             msg = MIMEMultipart()
             msg['From']    = settings.SMTP_FROM

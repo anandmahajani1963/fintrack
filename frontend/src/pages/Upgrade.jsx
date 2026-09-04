@@ -28,7 +28,6 @@ const TIERS = [
       { text: 'Basic analytics',           included: true },
       { text: 'Budget alerts',             included: false },
       { text: 'PDF & Excel export',        included: false },
-      { text: 'Multi-factor auth (MFA)',   included: false },
       { text: 'Unlimited cards & history', included: false },
     ],
   },
@@ -48,7 +47,6 @@ const TIERS = [
       { text: 'Full analytics',            included: true },
       { text: 'Budget alerts',             included: true },
       { text: 'PDF & Excel export',        included: true },
-      { text: 'Multi-factor auth (MFA)',   included: true },
       { text: 'Unlimited cards & history', included: true },
     ],
   },
@@ -345,7 +343,8 @@ export default function Upgrade() {
 
       {/* Footer note */}
       <p className="text-center text-xs text-gray-400 mt-8">
-        All plans include end-to-end encryption. Your data is never sold or shared.
+        All plans include two-factor authentication and end-to-end encryption.
+        Your data is never sold or shared.
         14-day free trial on all paid plans. Cancel anytime. · Contact
         <a href="mailto:nudgelabsllc@gmail.com"
            className="text-blue-500 hover:underline mx-1">

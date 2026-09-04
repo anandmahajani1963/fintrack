@@ -69,7 +69,7 @@ PLAN_FEATURES = {
         "analytics":      "basic",
         "export":         False,
         "budgets":        False,
-        "mfa":            False,
+        "mfa":            True,
         "live_feeds":     False,
     },
     "household": {

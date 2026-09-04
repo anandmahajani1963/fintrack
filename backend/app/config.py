@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     API_PORT:    int = 8000
     API_ENV:     str = "development"
     SECRET_KEY:  str
+    FRONTEND_URL: str = "https://fintrack.nudgelabs.app"
 
     # Token expiry
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
@@ -56,11 +57,11 @@ class Settings(BaseSettings):
 
 
     # SMTP settings for email OTP
-    SMTP_HOST: str = ""
+    SMTP_HOST: str = "smtp.zoho.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = ""
+    SMTP_USER: str = "admin@nudgelabs.app"
     SMTP_PASS: str = ""
-    SMTP_FROM: str = ""
+    SMTP_FROM: str = "admin@nudgelabs.app"
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
